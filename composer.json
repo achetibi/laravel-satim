@@ -1,0 +1,72 @@
+{
+    "name": "achetibi/laravel-satim",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "description": "Laravel package for integrating SATIM online payments.",
+    "keywords": [
+        "achetibi",
+        "satim",
+        "payment",
+        "laravel-satim"
+    ],
+    "homepage": "https://github.com/achetibi/laravel-satim",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Abderrahim CHETIBI",
+            "email": "chetibi.abderrahim@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.9",
+        "illuminate/config": "^12.19",
+        "illuminate/http": "^12.19",
+        "illuminate/support": "^12.19"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.22",
+        "orchestra/testbench": "^10.4",
+        "pestphp/pest": "^3.8",
+        "pestphp/pest-plugin-laravel": "^3.2",
+        "pestphp/pest-plugin-type-coverage": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelSatim\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaravelSatim\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "lint": "pint",
+        "test:lint": "pint --test",
+        "test:inline": "pest --colors=always",
+        "test:parallel": "pest --colors=always --parallel --processes=3",
+        "test": [
+            "@test:lint",
+            "@test:parallel"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelSatim\\SatimServiceProvider"
+            ],
+            "aliases": {
+                "LaravelSatim": "LaravelSatim\\SatimFacade"
+            }
+        }
+    }
+}
