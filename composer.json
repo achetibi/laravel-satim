@@ -1,6 +1,6 @@
 {
     "name": "achetibi/laravel-satim",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "description": "Laravel package for integrating SATIM online payments.",
     "keywords": [
