@@ -69,7 +69,7 @@ it('throws exception on server error', function () {
     $client = new SatimHttpClient;
 
     $client->call('register.do');
-})->throws(SatimApiServerException::class, 'Server error: Internal Server Error (500).');
+})->throws(SatimApiServerException::class, 'Server Error: Internal Server Error (500).');
 
 it('throws exception if API URL is not configured', function () {
     config()?->set('satim.api_url', null);

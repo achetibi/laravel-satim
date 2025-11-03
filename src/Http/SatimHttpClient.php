@@ -42,7 +42,7 @@ class SatimHttpClient
                 ->get($this->getEndpoint($endpoint), $data);
 
             if ($response->successful() === false) {
-                throw new SatimApiServerException("Server error: {$response->reason()} ({$response->status()}).");
+                throw new SatimApiServerException("Server Error: {$response->reason()} ({$response->status()}).");
             }
 
             return $response->json();
