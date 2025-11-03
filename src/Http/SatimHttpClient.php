@@ -34,7 +34,11 @@ class SatimHttpClient
     public function call(string $endpoint, array $data = []): ?array
     {
         try {
+            $retry = (int) config('satim.http_client.retry', 0);
+            $sleeptime = (int) config('satim.http_client.sleeptime', 1);
+
             $response = Http::withOptions($this->options())
+                ->when($retry > 0, fn ($http) => $http->retry($retry, $sleeptime))
                 ->get($this->getEndpoint($endpoint), $data);
 
             if ($response->successful() === false) {
@@ -43,11 +47,7 @@ class SatimHttpClient
 
             return $response->json();
         } catch (ConnectionException $e) {
-            throw new SatimApiServerException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
+            throw new SatimApiServerException($e->getMessage());
         }
     }
 
@@ -89,9 +89,9 @@ class SatimHttpClient
     protected function options(): array
     {
         return [
-            'verify' => true,
-            'allow_redirects' => false,
-            'timeout' => config('satim.timeout', 30),
+            'verify' => config('satim.http_options.verify', true),
+            'allow_redirects' => config('satim.http_options.allow_redirects', false),
+            'timeout' => (int) config('satim.http_options.timeout', 30),
         ];
     }
 }

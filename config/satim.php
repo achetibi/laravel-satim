@@ -70,11 +70,37 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | API Timeout
+    | HTTP Client Options
     |--------------------------------------------------------------------------
     |
-    | The timeout used in the SATIM API requests
+    | These options are passed directly to the underlying Guzzle HTTP client
+    | used by Laravel's HTTP facade.
+    |
+    | - "verify": Set to false only in development or testing environments.
+    | - "allow_redirects": Set to true to automatically follow redirects.
+    | - "timeout": The timeout used in the SATIM API requests
     |
     */
-    'timeout' => env('SATIM_TIMEOUT', 30),
+    'http_options' => [
+        'verify' => env('SATIM_HTTP_VERIFY_SSL', true),
+        'allow_redirects' => env('SATIM_HTTP_ALLOW_REDIRECTS', false),
+        'timeout' => env('SATIM_HTTP_TIMEOUT', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Client Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Defines how the HTTP client should handle temporary network errors
+    | when communicating with the SATIM API.
+    |
+    | - "retry": The number of retry attempts before failing the request.
+    | - "sleeptime": The delay (in milliseconds) between each retry attempt.
+    |
+    */
+    'http_client' => [
+        'retry' => env('SATIM_HTTP_CLIENT_RETRY', 3),
+        'sleeptime' => env('SATIM_HTTP_CLIENT_SLEEPTIME', 300),
+    ],
 ];
