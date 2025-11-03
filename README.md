@@ -45,11 +45,21 @@ Add the following variables to your `.env`:
 SATIM_USERNAME=your_username
 SATIM_PASSWORD=your_password
 SATIM_TERMINAL=your_terminal
-SATIM_TIMEOUT=15
 SATIM_LANGUAGE=fr
 SATIM_CURRENCY=DZD
 SATIM_API_URL=https://fake.satim.dz/payment/rest
 ```
+
+You can also set the http client configuration in the `config/satim.php` using your `.env` file:
+```env
+SATIM_HTTP_VERIFY_SSL=true
+SATIM_HTTP_TIMEOUT=30
+SATIM_HTTP_CLIENT_RETRY=3
+SATIM_HTTP_CLIENT_SLEEPTIME=300
+```
+
+You can disable SSL verification in development environments only.
+You can also set the number of retries and the sleep time between each retry for failed requests.
 
 ---
 
