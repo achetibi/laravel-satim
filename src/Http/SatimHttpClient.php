@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http;
 
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use LaravelSatim\Exceptions\SatimApiServerException;
+use Throwable;
 
 /**
  * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
@@ -46,7 +46,7 @@ class SatimHttpClient
             }
 
             return $response->json();
-        } catch (ConnectionException $e) {
+        } catch (Throwable $e) {
             throw new SatimApiServerException($e->getMessage());
         }
     }

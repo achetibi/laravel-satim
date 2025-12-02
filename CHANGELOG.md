@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-satim` will be documented in this file
 
+## 1.1.1 - 2025-12-02
+
+- catch any throwable exception in the satim http client
+
 ## 1.1.0 - 2025-11-03
 
 - added satim http client config
