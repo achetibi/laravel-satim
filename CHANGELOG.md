@@ -2,6 +2,11 @@
 
 All notable changes to `laravel-satim` will be documented in this file
 
+## 1.1.2 - 2026-04-14
+
+- added support for Laravel 13
+- updated dependencies to the latest versions
+
 ## 1.1.1 - 2025-12-02
 
 - catch any throwable exception in the satim http client

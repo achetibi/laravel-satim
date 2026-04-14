@@ -1,5 +1,7 @@
 <?php
 
+use LaravelSatim\Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,7 +13,7 @@
 |
 */
 
-pest()->extend(LaravelSatim\Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->in('Feature');
 
 /*
