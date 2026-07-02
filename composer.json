@@ -43,8 +43,8 @@
         }
     },
     "scripts": {
-        "lint": "pint",
-        "test:lint": "pint --test",
+        "lint": "pint --preset psr12",
+        "test:lint": "pint --preset psr12 --test",
         "test:inline": "pest --colors=always",
         "test:parallel": "pest --colors=always --parallel --processes=3",
         "test": [

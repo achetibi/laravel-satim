@@ -22,7 +22,8 @@ class Satim implements SatimInterface
         protected SatimHttpClient $httpClient,
         protected ?SatimCurrency $currency = null,
         protected ?SatimLanguage $language = null,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws SatimApiServerException

@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Exceptions;
 
-class SatimInvalidOrderException extends \Exception {}
+class SatimInvalidOrderException extends \Exception
+{
+}

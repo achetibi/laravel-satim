@@ -13,7 +13,8 @@ abstract class AbstractSatimResponse
         public ?string $errorCode = null,
         public ?string $errorMessage = null,
         public array $params = []
-    ) {}
+    ) {
+    }
 
     public function cardTemporarilyBlocked(): bool
     {

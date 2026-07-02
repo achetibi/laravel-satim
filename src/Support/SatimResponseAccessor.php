@@ -8,7 +8,8 @@ readonly class SatimResponseAccessor
 {
     public function __construct(
         private array $data
-    ) {}
+    ) {
+    }
 
     public function getString(string $key, ?string $default = null): ?string
     {

@@ -14,7 +14,7 @@ it('can calls the API and returns a JSON response', function () {
         'https://test.satim.dz/payment/rest/*' => Http::response(['ErrorCode' => '0']),
     ]);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $response = $client->call('register.do', ['key' => 'value']);
 
@@ -28,7 +28,7 @@ it('can adds query params to the URL', function () {
         return Http::response(['ErrorCode' => '0']);
     });
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $response = $client->call('register.do', ['key' => 'value']);
 
@@ -42,7 +42,7 @@ it('can formats the URL correctly regardless of slashes', function () {
         'https://test.satim.dz/payment/rest/register.do' => Http::response(['ErrorCode' => '0']),
     ]);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $response = $client->call('/register.do');
 
@@ -54,7 +54,7 @@ it('can returns null if response has empty JSON body', function () {
         '*' => Http::response(),
     ]);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $response = $client->call('register.do');
 
@@ -66,7 +66,7 @@ it('throws exception on server error', function () {
         'https://test.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
     ]);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $client->call('register.do');
 })->throws(SatimApiServerException::class, 'Server Error: Internal Server Error (500).');
@@ -74,7 +74,7 @@ it('throws exception on server error', function () {
 it('throws exception if API URL is not configured', function () {
     config()?->set('satim.api_url', null);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $client->call('register.do');
 })->throws(SatimApiServerException::class, 'SATIM API URL is not configured.');
@@ -84,7 +84,7 @@ it('throws exception on connection failure', function () {
         'https://test.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
     ]);
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
 
     $client->call('register.do');
 })->throws(SatimApiServerException::class, 'Connection failed');
@@ -92,6 +92,6 @@ it('throws exception on connection failure', function () {
 it('throws if satim.api_url config is empty', function () {
     config()?->set('satim.api_url', '');
 
-    $client = new SatimHttpClient;
+    $client = new SatimHttpClient();
     $client->call('any');
 })->throws(SatimApiServerException::class, 'SATIM API URL is not configured.');
