@@ -78,7 +78,7 @@ class Satim implements SatimInterface
     public function getCurrency(): SatimCurrency
     {
         if (! ($this->currency instanceof SatimCurrency)) {
-            $this->currency = SatimCurrency::tryFrom(strtoupper(config('satim.currency')))
+            $this->currency = SatimCurrency::tryFrom(strtoupper((string) config('satim.currency')))
                 ?? SatimCurrency::fallback();
         }
 
@@ -88,7 +88,7 @@ class Satim implements SatimInterface
     public function getLanguage(): SatimLanguage
     {
         if (! ($this->language instanceof SatimLanguage)) {
-            $this->language = SatimLanguage::tryFrom(strtoupper(config('satim.language')))
+            $this->language = SatimLanguage::tryFrom(strtoupper((string) config('satim.language')))
                 ?? SatimLanguage::fallback();
         }
 

@@ -46,7 +46,7 @@ final class SatimRefundRequest extends AbstractSatimRequest implements SatimRequ
     public function toRequest(): array
     {
         return array_merge($this->toArray(), [
-            'amount' => (int) ($this->amount * 100),
+            'amount' => (int) round($this->amount * 100),
         ]);
     }
 

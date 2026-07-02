@@ -92,7 +92,7 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
     public function toRequest(): array
     {
         return array_merge($this->toArray(), [
-            'amount' => (int) ($this->amount * 100),
+            'amount' => (int) round($this->amount * 100),
             'currency' => $this->currency?->value,
             'language' => $this->language?->value,
             'jsonParams' => json_encode(array_filter($this->toArray()['jsonParams'])),

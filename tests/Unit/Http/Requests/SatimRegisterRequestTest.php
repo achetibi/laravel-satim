@@ -166,6 +166,18 @@ it('can converts amount to cents correctly in request format', function () {
     expect($requestData['amount'])->toBe(12345);
 });
 
+it('can converts float-sensitive amounts to cents without truncation', function () {
+    $request = SatimRegisterRequest::make(
+        orderNumber: 'ORDER123',
+        amount: 64.07,
+        returnUrl: 'https://example.com/return',
+        udf1: 'udf1'
+    );
+
+    $requestData = $request->toRequest();
+    expect($requestData['amount'])->toBe(6407);
+});
+
 it('can encodes jsonParams correctly in request format', function () {
     $request = SatimRegisterRequest::make(
         orderNumber: 'ORDER123',

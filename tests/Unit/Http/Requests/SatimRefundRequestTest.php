@@ -81,6 +81,15 @@ it('can converts amount to cents correctly in request format', function () {
     expect($requestData['amount'])->toBe(99999);
 });
 
+it('can converts float-sensitive amounts to cents without truncation', function () {
+    $request = SatimRefundRequest::make(
+        orderId: 'ORDER123',
+        amount: 64.07
+    );
+
+    expect($request->toRequest()['amount'])->toBe(6407);
+});
+
 it('can create a refund request with orderId max length', function () {
     $request = SatimRefundRequest::make(
         orderId: str_repeat('a', 20),
