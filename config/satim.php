@@ -11,7 +11,7 @@ return [
     | You can configure the API endpoint for production or test environments
     |
     */
-    'api_url' => env('SATIM_API_URL', 'https://test.satim.dz/payment/rest'),
+    'api_url' => env('SATIM_API_URL', 'https://test2.satim.dz/payment/rest'),
 
     /*
     |--------------------------------------------------------------------------
@@ -95,11 +95,15 @@ return [
     | Defines how the HTTP client should handle temporary network errors
     | when communicating with the SATIM API.
     |
+    | - "method": The HTTP verb used for API requests. SATIM strongly recommends
+    |   "POST" so that sensitive data is not exposed in URLs, logs or browser
+    |   history. Use "GET" only if explicitly required.
     | - "retry": The number of retry attempts before failing the request.
     | - "sleeptime": The delay (in milliseconds) between each retry attempt.
     |
     */
     'http_client' => [
+        'method' => env('SATIM_HTTP_CLIENT_METHOD', 'POST'),
         'retry' => env('SATIM_HTTP_CLIENT_RETRY', 3),
         'sleeptime' => env('SATIM_HTTP_CLIENT_SLEEPTIME', 300),
     ],
