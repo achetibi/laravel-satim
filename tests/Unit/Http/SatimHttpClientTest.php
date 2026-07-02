@@ -21,8 +21,27 @@ it('can calls the API and returns a JSON response', function () {
     expect($response)->toBe(['ErrorCode' => '0']);
 });
 
-it('can adds query params to the URL', function () {
+it('sends params in the body using POST by default', function () {
     Http::fake(function ($request) {
+        expect($request->method())->toBe('POST');
+        expect($request->url())->not->toContain('key=value');
+        expect($request->data())->toBe(['key' => 'value']);
+
+        return Http::response(['ErrorCode' => '0']);
+    });
+
+    $client = new SatimHttpClient();
+
+    $response = $client->call('register.do', ['key' => 'value']);
+
+    expect($response)->toBe(['ErrorCode' => '0']);
+});
+
+it('can send params in the query string when method is GET', function () {
+    config()?->set('satim.http_client.method', 'GET');
+
+    Http::fake(function ($request) {
+        expect($request->method())->toBe('GET');
         expect($request->url())->toContain('key=value');
 
         return Http::response(['ErrorCode' => '0']);

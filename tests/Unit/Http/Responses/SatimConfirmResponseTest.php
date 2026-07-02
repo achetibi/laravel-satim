@@ -16,6 +16,7 @@ it('should extends and implements satim response classes', function () {
             'cardholderName' => '**********',
             'depositAmount' => 100000,
             'currency' => '012',
+            'authorizationResponseId' => '402130',
             'approvalCode' => '402130',
             'authCode' => 2,
             'params' => [
@@ -47,6 +48,7 @@ it('should confirm a valid credit card', function () {
             'cardholderName' => '**********',
             'depositAmount' => 100000,
             'currency' => '012',
+            'authorizationResponseId' => '402130',
             'approvalCode' => '402130',
             'authCode' => 2,
             'params' => [
@@ -78,6 +80,8 @@ it('should confirm a valid credit card', function () {
         ->and($response->cardExpired())->toBeFalse()
         ->and($response->amount)->toEqual(1000)
         ->and($response->depositAmount)->toEqual(1000)
+        ->and($response->approvalCode)->toBe('402130')
+        ->and($response->authorizationResponseId)->toBe('402130')
         ->and($response->orderNumber)->toBeString('1538298192')
         ->and($response->orderStatus)->toBeString('2')
         ->and($response->actionCode)->toBeString('0')

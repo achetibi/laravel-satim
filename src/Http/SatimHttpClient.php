@@ -18,10 +18,14 @@ class SatimHttpClient
         try {
             $retry = (int) config('satim.http_client.retry', 0);
             $sleeptime = (int) config('satim.http_client.sleeptime', 1);
+            $method = strtolower((string) config('satim.http_client.method', 'POST'));
 
-            $response = Http::withOptions($this->options())
-                ->when($retry > 0, fn ($http) => $http->retry($retry, $sleeptime))
-                ->get($this->getEndpoint($endpoint), $data);
+            $request = Http::withOptions($this->options())
+                ->when($retry > 0, fn ($http) => $http->retry($retry, $sleeptime));
+
+            $response = $method === 'get'
+                ? $request->get($this->getEndpoint($endpoint), $data)
+                : $request->asForm()->post($this->getEndpoint($endpoint), $data);
 
             if ($response->successful() === false) {
                 throw new SatimApiServerException("Server Error: {$response->reason()} ({$response->status()}).");

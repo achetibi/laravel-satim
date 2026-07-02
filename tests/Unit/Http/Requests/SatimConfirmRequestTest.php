@@ -83,9 +83,9 @@ it('can converts to request format correctly', function () {
     expect($requestData)
         ->toBeArray()
         ->toHaveKeys([
-            'userName', 'password', 'orderId', 'language',
+            'userName', 'password', 'mdOrder', 'language',
         ])
-        ->and($requestData['orderId'])->toBe('ORDER123')
+        ->and($requestData['mdOrder'])->toBe('ORDER123')
         ->and($requestData['language'])->toBe(SatimLanguage::EN->value);
 });
 
@@ -99,9 +99,9 @@ it('can converts to request with null language', function () {
     expect($requestData)
         ->toBeArray()
         ->toHaveKeys([
-            'userName', 'password', 'orderId', 'language',
+            'userName', 'password', 'mdOrder', 'language',
         ])
-        ->and($requestData['orderId'])->toBe('ORDER123')
+        ->and($requestData['mdOrder'])->toBe('ORDER123')
         ->and($requestData['language'])->toBeNull();
 });
 

@@ -7,12 +7,12 @@ namespace LaravelSatim\Http\Responses;
 abstract class AbstractSatimResponse
 {
     public function __construct(
-        public ?string $orderStatus = null,
-        public ?string $actionCode = null,
-        public ?string $actionCodeDescription = null,
-        public ?string $errorCode = null,
-        public ?string $errorMessage = null,
-        public array $params = []
+        public readonly ?string $orderStatus = null,
+        public readonly ?string $actionCode = null,
+        public readonly ?string $actionCodeDescription = null,
+        public readonly ?string $errorCode = null,
+        public readonly ?string $errorMessage = null,
+        public readonly array $params = []
     ) {
     }
 

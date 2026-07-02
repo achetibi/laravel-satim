@@ -57,7 +57,7 @@ function registerEndpoint(array $data = [])
 
 function confirmEndpoint(array $data = [])
 {
-    return fakeApi('/confirmOrder.do', $data);
+    return fakeApi('/public/acknowledgeTransaction.do', $data);
 }
 
 function refundEndpoint(array $data = [])

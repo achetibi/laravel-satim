@@ -6,28 +6,31 @@ namespace LaravelSatim\Http\Responses;
 
 use LaravelSatim\Contracts\SatimResponseInterface;
 use LaravelSatim\Enums\SatimCurrency;
-use LaravelSatim\Support\SatimResponseAccessor;
 
 class SatimConfirmResponse extends AbstractSatimResponse implements SatimResponseInterface
 {
     public function __construct(
-        public ?string $expiration = null,
-        public ?string $cardholderName = null,
-        public ?float $depositAmount = null,
-        public ?SatimCurrency $currency = null,
-        public ?string $pan = null,
-        public ?string $approvalCode = null,
-        public ?int $authCode = null,
-        public ?string $orderNumber = null,
-        public ?float $amount = null,
-        public ?string $svfeResponse = null,
-        public ?string $orderStatus = null,
-        public ?string $actionCode = null,
-        public ?string $actionCodeDescription = null,
-        public ?string $errorCode = null,
-        public ?string $errorMessage = null,
-        public ?string $ip = null,
-        public array $params = []
+        public readonly ?string $expiration = null,
+        public readonly ?string $cardholderName = null,
+        public readonly ?float $depositAmount = null,
+        public readonly ?SatimCurrency $currency = null,
+        public readonly ?string $pan = null,
+        public readonly ?string $approvalCode = null,
+        public readonly ?string $authorizationResponseId = null,
+        public readonly ?string $orderNumber = null,
+        public readonly ?float $amount = null,
+        public readonly ?string $svfeResponse = null,
+        public readonly ?string $ip = null,
+        public readonly ?string $clientId = null,
+        public readonly ?string $bindingId = null,
+        public readonly ?string $paymentAccountReference = null,
+        public readonly ?string $description = null,
+        ?string $orderStatus = null,
+        ?string $actionCode = null,
+        ?string $actionCodeDescription = null,
+        ?string $errorCode = null,
+        ?string $errorMessage = null,
+        array $params = []
     ) {
         parent::__construct(
             orderStatus: $orderStatus,
@@ -41,30 +44,33 @@ class SatimConfirmResponse extends AbstractSatimResponse implements SatimRespons
 
     public static function fromResponse(array $response): SatimConfirmResponse
     {
-        $responseAccessor = SatimResponseAccessor::make($response);
-        $paramsAccessor = SatimResponseAccessor::make($responseAccessor->getArray('params'));
+        $data = SatimResponseData::from($response);
 
         return new SatimConfirmResponse(
-            expiration: $responseAccessor->getString('expiration'),
-            cardholderName: $responseAccessor->getString('cardholderName'),
-            depositAmount: $responseAccessor->getFloat('depositAmount', 0) / 100,
-            currency: $responseAccessor->getEnum('currency', SatimCurrency::class),
-            pan: $responseAccessor->getString('Pan'),
-            approvalCode: $responseAccessor->getString('approvalCode'),
-            authCode: $responseAccessor->getInt('authCode'),
-            orderNumber: $responseAccessor->getString('OrderNumber'),
-            amount: $responseAccessor->getFloat('Amount', 0) / 100,
-            svfeResponse: $responseAccessor->getString('SvfeResponse'),
-            orderStatus: $responseAccessor->getString('OrderStatus'),
-            actionCode: $responseAccessor->getString('actionCode'),
-            actionCodeDescription: $responseAccessor->getString('actionCodeDescription'),
-            errorCode: $responseAccessor->getString('ErrorCode'),
-            errorMessage: $responseAccessor->getString('ErrorMessage'),
-            ip: $responseAccessor->getString('Ip'),
+            expiration: $data->string('expiration'),
+            cardholderName: $data->string('cardholderName'),
+            depositAmount: $data->float('depositAmount', 0.0) / 100,
+            currency: $data->enum('currency', SatimCurrency::class),
+            pan: $data->string('Pan'),
+            approvalCode: $data->string('approvalCode'),
+            authorizationResponseId: $data->string('authorizationResponseId'),
+            orderNumber: $data->string('OrderNumber'),
+            amount: $data->float('Amount', 0.0) / 100,
+            svfeResponse: $data->string('SvfeResponse'),
+            ip: $data->string('Ip'),
+            clientId: $data->string('clientId'),
+            bindingId: $data->string('bindingId'),
+            paymentAccountReference: $data->string('paymentAccountReference'),
+            description: $data->string('Description'),
+            orderStatus: $data->string('OrderStatus'),
+            actionCode: $data->string('actionCode'),
+            actionCodeDescription: $data->string('actionCodeDescription'),
+            errorCode: $data->string('ErrorCode'),
+            errorMessage: $data->string('ErrorMessage'),
             params: [
-                'udf1' => $paramsAccessor->getString('udf1'),
-                'respCode' => $paramsAccessor->getString('respCode'),
-                'respCode_desc' => $paramsAccessor->getString('respCode_desc'),
+                'udf1' => $data->string('params.udf1'),
+                'respCode' => $data->string('params.respCode'),
+                'respCode_desc' => $data->string('params.respCode_desc'),
             ]
         );
     }

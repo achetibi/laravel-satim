@@ -45,7 +45,7 @@ class Satim implements SatimInterface
         $data = $this->data($request->toRequest());
 
         return SatimConfirmResponse::fromResponse(
-            $this->httpClient->call('/confirmOrder.do', $data)
+            $this->httpClient->call('/public/acknowledgeTransaction.do', $data)
         );
     }
 

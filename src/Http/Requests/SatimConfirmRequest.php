@@ -47,9 +47,12 @@ final class SatimConfirmRequest extends AbstractSatimRequest implements SatimReq
 
     public function toRequest(): array
     {
-        return array_merge($this->toArray(), [
+        return [
+            'userName' => $this->userName(),
+            'password' => $this->password(),
+            'mdOrder' => $this->orderId,
             'language' => $this->language?->value,
-        ]);
+        ];
     }
 
     /**
