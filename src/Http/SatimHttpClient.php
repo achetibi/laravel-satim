@@ -8,28 +8,10 @@ use Illuminate\Support\Facades\Http;
 use LaravelSatim\Exceptions\SatimApiServerException;
 use Throwable;
 
-/**
- * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @project laravel-satim
- *
- * @name SatimHttpClient
- *
- * @license MIT
- * @copyright (c) 2025 Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @created 21/06/2025
- *
- * @version 1.0.0
- */
 class SatimHttpClient
 {
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public function call(string $endpoint, array $data = []): ?array
     {
@@ -53,10 +35,6 @@ class SatimHttpClient
 
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     protected function getApiUrl(): string
     {
@@ -68,10 +46,6 @@ class SatimHttpClient
 
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     protected function getEndpoint(string $endpoint): string
     {
@@ -81,11 +55,6 @@ class SatimHttpClient
         ]);
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     protected function options(): array
     {
         return [

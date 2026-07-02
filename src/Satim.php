@@ -16,20 +16,6 @@ use LaravelSatim\Http\Responses\SatimRefundResponse;
 use LaravelSatim\Http\Responses\SatimRegisterResponse;
 use LaravelSatim\Http\SatimHttpClient;
 
-/**
- * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @project laravel-satim
- *
- * @name Satim
- *
- * @license MIT
- * @copyright (c) 2025 Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @created 21/06/2025
- *
- * @version 1.0.0
- */
 class Satim implements SatimInterface
 {
     public function __construct(
@@ -40,10 +26,6 @@ class Satim implements SatimInterface
 
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public function register(SatimRegisterRequest $request): SatimRegisterResponse
     {
@@ -56,10 +38,6 @@ class Satim implements SatimInterface
 
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public function confirm(SatimConfirmRequest $request): SatimConfirmResponse
     {
@@ -72,10 +50,6 @@ class Satim implements SatimInterface
 
     /**
      * @throws SatimApiServerException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public function refund(SatimRefundRequest $request): SatimRefundResponse
     {
@@ -86,11 +60,6 @@ class Satim implements SatimInterface
         );
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function setCurrency(SatimCurrency $currency): SatimInterface
     {
         $this->currency = $currency;
@@ -98,11 +67,6 @@ class Satim implements SatimInterface
         return $this;
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function setLanguage(SatimLanguage $language): SatimInterface
     {
         $this->language = $language;
@@ -110,11 +74,6 @@ class Satim implements SatimInterface
         return $this;
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function getCurrency(): SatimCurrency
     {
         if (! ($this->currency instanceof SatimCurrency)) {
@@ -125,11 +84,6 @@ class Satim implements SatimInterface
         return $this->currency;
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function getLanguage(): SatimLanguage
     {
         if (! ($this->language instanceof SatimLanguage)) {
@@ -140,11 +94,6 @@ class Satim implements SatimInterface
         return $this->language;
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     protected function data(array $data): array
     {
         if (array_key_exists('language', $data) && empty($data['language'])) {

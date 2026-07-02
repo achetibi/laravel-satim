@@ -11,20 +11,6 @@ use LaravelSatim\Enums\SatimCurrency;
 use LaravelSatim\Enums\SatimLanguage;
 use LaravelSatim\Exceptions\SatimInvalidArgumentException;
 
-/**
- * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @project laravel-satim
- *
- * @name SatimRegisterRequest
- *
- * @license MIT
- * @copyright (c) 2025 Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
- *
- * @created 21/06/2025
- *
- * @version 1.0.0
- */
 final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRequestInterface
 {
     /**
@@ -49,10 +35,6 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
 
     /**
      * @throws SatimInvalidArgumentException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public static function make(
         string $orderNumber,
@@ -84,11 +66,6 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         );
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function toArray(): array
     {
         return [
@@ -112,11 +89,6 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         ];
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
-     */
     public function toRequest(): array
     {
         return array_merge($this->toArray(), [
@@ -129,10 +101,6 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
 
     /**
      * @throws SatimInvalidArgumentException
-     *
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 21/06/2025
      */
     public function validate(): void
     {

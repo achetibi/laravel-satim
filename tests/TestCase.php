@@ -7,32 +7,17 @@ use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 27/06/2025
-     */
     protected function setUp(): void
     {
         parent::setUp();
         $this->artisan('config:clear');
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 27/06/2025
-     */
     protected function getPackageProviders($app): array
     {
         return [SatimServiceProvider::class];
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 27/06/2025
-     */
     protected function getEnvironmentSetUp($app): void
     {
         $app['config']->set('satim.username', 'test_username');
@@ -44,11 +29,6 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('satim.currency', 'DZD');
     }
 
-    /**
-     * @author Abderrahim CHETIBI <chetibi.abderrahim@gmail.com>
-     *
-     * @created 27/06/2025
-     */
     protected function defineEnvironment($app): void
     {
         $app['config']->set('satim', [
