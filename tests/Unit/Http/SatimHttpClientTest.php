@@ -11,7 +11,7 @@ uses(TestCase::class);
 
 it('can calls the API and returns a JSON response', function () {
     Http::fake([
-        'https://test.satim.dz/payment/rest/*' => Http::response(['ErrorCode' => '0']),
+        'https://test2.satim.dz/payment/rest/*' => Http::response(['ErrorCode' => '0']),
     ]);
 
     $client = new SatimHttpClient();
@@ -55,10 +55,10 @@ it('can send params in the query string when method is GET', function () {
 });
 
 it('can formats the URL correctly regardless of slashes', function () {
-    config()?->set('satim.api_url', 'https://test.satim.dz/payment/rest/////');
+    config()?->set('satim.api_url', 'https://test2.satim.dz/payment/rest/////');
 
     Http::fake([
-        'https://test.satim.dz/payment/rest/register.do' => Http::response(['ErrorCode' => '0']),
+        'https://test2.satim.dz/payment/rest/register.do' => Http::response(['ErrorCode' => '0']),
     ]);
 
     $client = new SatimHttpClient();
@@ -82,7 +82,7 @@ it('can returns null if response has empty JSON body', function () {
 
 it('throws exception on server error', function () {
     Http::fake([
-        'https://test.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
+        'https://test2.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
     ]);
 
     $client = new SatimHttpClient();
@@ -100,7 +100,7 @@ it('throws exception if API URL is not configured', function () {
 
 it('throws exception on connection failure', function () {
     Http::fake([
-        'https://test.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
+        'https://test2.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
     ]);
 
     $client = new SatimHttpClient();
@@ -117,7 +117,7 @@ it('throws if satim.api_url config is empty', function () {
 
 it('preserves the original throwable as the previous exception', function () {
     Http::fake([
-        'https://test.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
+        'https://test2.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
     ]);
 
     $client = new SatimHttpClient();
@@ -133,7 +133,7 @@ it('preserves the original throwable as the previous exception', function () {
 
 it('does not double-wrap its own server error exception', function () {
     Http::fake([
-        'https://test.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
+        'https://test2.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
     ]);
 
     $client = new SatimHttpClient();
