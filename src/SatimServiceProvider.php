@@ -25,6 +25,6 @@ class SatimServiceProvider extends ServiceProvider
     protected function registerServices(): void
     {
         $this->app->singleton(SatimInterface::class, Satim::class);
-        $this->app->bind('laravel-satim', Satim::class);
+        $this->app->alias(SatimInterface::class, 'laravel-satim');
     }
 }

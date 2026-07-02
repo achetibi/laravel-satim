@@ -79,7 +79,7 @@ class Satim implements SatimInterface
     {
         if (! ($this->currency instanceof SatimCurrency)) {
             $value = config('satim.currency');
-            $this->currency = SatimCurrency::tryFrom(strtoupper(is_string($value) ? $value : ''))
+            $this->currency = SatimCurrency::resolve(is_string($value) ? $value : null)
                 ?? SatimCurrency::fallback();
         }
 
@@ -90,7 +90,7 @@ class Satim implements SatimInterface
     {
         if (! ($this->language instanceof SatimLanguage)) {
             $value = config('satim.language');
-            $this->language = SatimLanguage::tryFrom(strtoupper(is_string($value) ? $value : ''))
+            $this->language = SatimLanguage::resolve(is_string($value) ? $value : null)
                 ?? SatimLanguage::fallback();
         }
 

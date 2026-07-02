@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Facade;
 use LaravelSatim\Contracts\SatimInterface;
+use LaravelSatim\Enums\SatimCurrency;
+use LaravelSatim\Enums\SatimLanguage;
 use LaravelSatim\Satim;
 use LaravelSatim\SatimFacade;
 use LaravelSatim\Tests\TestCase;
@@ -22,4 +24,15 @@ it('check that the SatimFacade is resolvable and returns the correct underlying 
     expect(SatimFacade::getFacadeRoot())
         ->toBeInstanceOf(Satim::class)
         ->and(app(SatimInterface::class))->toBeInstanceOf(Satim::class);
+});
+
+it('shares a single instance between the container and the facade', function () {
+    expect(SatimFacade::getFacadeRoot())->toBe(app(SatimInterface::class));
+});
+
+it('keeps runtime state set through the container visible from the facade', function () {
+    app(SatimInterface::class)->setCurrency(SatimCurrency::DZD)->setLanguage(SatimLanguage::FR);
+
+    expect(SatimFacade::getFacadeRoot()->getLanguage())->toBe(SatimLanguage::FR)
+        ->and(SatimFacade::getFacadeRoot()->getCurrency())->toBe(SatimCurrency::DZD);
 });

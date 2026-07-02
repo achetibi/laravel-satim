@@ -114,3 +114,35 @@ it('throws if satim.api_url config is empty', function () {
     $client = new SatimHttpClient();
     $client->call('any');
 })->throws(SatimApiServerException::class, 'SATIM API URL is not configured.');
+
+it('preserves the original throwable as the previous exception', function () {
+    Http::fake([
+        'https://test.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
+    ]);
+
+    $client = new SatimHttpClient();
+
+    try {
+        $client->call('register.do');
+        $this->fail('Expected a SatimApiServerException to be thrown.');
+    } catch (SatimApiServerException $e) {
+        expect($e->getPrevious())->toBeInstanceOf(ConnectionException::class)
+            ->and($e->getMessage())->toBe('Connection failed');
+    }
+});
+
+it('does not double-wrap its own server error exception', function () {
+    Http::fake([
+        'https://test.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
+    ]);
+
+    $client = new SatimHttpClient();
+
+    try {
+        $client->call('register.do');
+        $this->fail('Expected a SatimApiServerException to be thrown.');
+    } catch (SatimApiServerException $e) {
+        expect($e->getPrevious())->toBeNull()
+            ->and($e->getMessage())->toBe('Server Error: Internal Server Error (500).');
+    }
+});

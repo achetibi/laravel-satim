@@ -30,17 +30,19 @@ class SatimHttpClient
             $response = $method === 'get'
                 ? $request->get($this->getEndpoint($endpoint), $data)
                 : $request->asForm()->post($this->getEndpoint($endpoint), $data);
-
-            if ($response->successful() === false) {
-                throw new SatimApiServerException("Server Error: {$response->reason()} ({$response->status()}).");
-            }
-
-            $json = $response->json();
-
-            return is_array($json) ? $json : null;
+        } catch (SatimApiServerException $e) {
+            throw $e;
         } catch (Throwable $e) {
-            throw new SatimApiServerException($e->getMessage());
+            throw new SatimApiServerException($e->getMessage(), previous: $e);
         }
+
+        if ($response->successful() === false) {
+            throw new SatimApiServerException("Server Error: {$response->reason()} ({$response->status()}).");
+        }
+
+        $json = $response->json();
+
+        return is_array($json) ? $json : null;
     }
 
     /**

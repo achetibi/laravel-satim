@@ -3,12 +3,38 @@
 declare(strict_types=1);
 
 use LaravelSatim\Contracts\SatimInterface;
+use LaravelSatim\Enums\SatimCurrency;
+use LaravelSatim\Enums\SatimLanguage;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 use LaravelSatim\Http\Requests\SatimRefundRequest;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
+use LaravelSatim\Http\SatimHttpClient;
+use LaravelSatim\Satim;
 use LaravelSatim\Tests\TestCase;
 
 uses(TestCase::class);
+
+it('resolves the configured currency whether it is given by name or by ISO value', function () {
+    config()->set('satim.currency', 'DZD');
+    expect((new Satim(new SatimHttpClient()))->getCurrency())->toBe(SatimCurrency::DZD);
+
+    config()->set('satim.currency', '012');
+    expect((new Satim(new SatimHttpClient()))->getCurrency())->toBe(SatimCurrency::DZD);
+
+    config()->set('satim.currency', 'invalid');
+    expect((new Satim(new SatimHttpClient()))->getCurrency())->toBe(SatimCurrency::fallback());
+});
+
+it('resolves the configured language whether it is given by name or by value', function () {
+    config()->set('satim.language', 'FR');
+    expect((new Satim(new SatimHttpClient()))->getLanguage())->toBe(SatimLanguage::FR);
+
+    config()->set('satim.language', 'ar');
+    expect((new Satim(new SatimHttpClient()))->getLanguage())->toBe(SatimLanguage::AR);
+
+    config()->set('satim.language', 'invalid');
+    expect((new Satim(new SatimHttpClient()))->getLanguage())->toBe(SatimLanguage::fallback());
+});
 
 it('registers an order against register.do', function () {
     Http::fake(function ($request) {
