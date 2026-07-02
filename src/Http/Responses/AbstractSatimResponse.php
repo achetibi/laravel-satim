@@ -6,6 +6,9 @@ namespace LaravelSatim\Http\Responses;
 
 abstract class AbstractSatimResponse
 {
+    /**
+     * @param  array<string, mixed>  $params
+     */
     public function __construct(
         public readonly ?string $orderStatus = null,
         public readonly ?string $actionCode = null,
@@ -118,17 +121,24 @@ abstract class AbstractSatimResponse
 
     public function errorMessage(): ?string
     {
-        return $this->params['respCode_desc'] ?? ($this->actionCodeDescription ?: null);
+        $description = $this->params['respCode_desc'] ?? null;
+
+        return is_string($description) ? $description : ($this->actionCodeDescription ?: null);
     }
 
     public function errorCode(): ?string
     {
-        return ($this->params['respCode'] ?? null) ?: $this->errorCode ?: null;
+        $respCode = $this->params['respCode'] ?? null;
+        $respCode = is_string($respCode) ? $respCode : null;
+
+        return ($respCode ?: $this->errorCode) ?: null;
     }
 
     public function successMessage(): ?string
     {
-        return $this->params['respCode_desc'] ?? ($this->actionCodeDescription ?: null);
+        $description = $this->params['respCode_desc'] ?? null;
+
+        return is_string($description) ? $description : ($this->actionCodeDescription ?: null);
     }
 
     public function successful(): bool

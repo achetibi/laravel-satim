@@ -8,5 +8,8 @@ use LaravelSatim\Http\Responses\AbstractSatimResponse;
 
 interface SatimResponseInterface
 {
-    public static function fromResponse(array $response): AbstractSatimResponse;
+    /**
+     * @param  array<array-key, mixed>|null  $response
+     */
+    public static function fromResponse(?array $response): AbstractSatimResponse;
 }

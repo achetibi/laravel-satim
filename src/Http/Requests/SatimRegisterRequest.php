@@ -66,6 +66,9 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -89,13 +92,19 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toRequest(): array
     {
-        return array_merge($this->toArray(), [
+        $data = $this->toArray();
+        $jsonParams = is_array($data['jsonParams']) ? array_filter($data['jsonParams']) : [];
+
+        return array_merge($data, [
             'amount' => (int) round($this->amount * 100),
             'currency' => $this->currency?->value,
             'language' => $this->language?->value,
-            'jsonParams' => json_encode(array_filter($this->toArray()['jsonParams'])),
+            'jsonParams' => json_encode($jsonParams),
         ]);
     }
 

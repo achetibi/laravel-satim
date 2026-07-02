@@ -8,16 +8,22 @@ abstract class AbstractSatimRequest
 {
     protected function userName(): ?string
     {
-        return config('satim.username');
+        $value = config('satim.username');
+
+        return is_string($value) ? $value : null;
     }
 
     protected function password(): ?string
     {
-        return config('satim.password');
+        $value = config('satim.password');
+
+        return is_string($value) ? $value : null;
     }
 
     protected function terminal(): ?string
     {
-        return config('satim.terminal');
+        $value = config('satim.terminal');
+
+        return is_string($value) ? $value : null;
     }
 }

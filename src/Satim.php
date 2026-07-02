@@ -78,7 +78,8 @@ class Satim implements SatimInterface
     public function getCurrency(): SatimCurrency
     {
         if (! ($this->currency instanceof SatimCurrency)) {
-            $this->currency = SatimCurrency::tryFrom(strtoupper((string) config('satim.currency')))
+            $value = config('satim.currency');
+            $this->currency = SatimCurrency::tryFrom(strtoupper(is_string($value) ? $value : ''))
                 ?? SatimCurrency::fallback();
         }
 
@@ -88,13 +89,18 @@ class Satim implements SatimInterface
     public function getLanguage(): SatimLanguage
     {
         if (! ($this->language instanceof SatimLanguage)) {
-            $this->language = SatimLanguage::tryFrom(strtoupper((string) config('satim.language')))
+            $value = config('satim.language');
+            $this->language = SatimLanguage::tryFrom(strtoupper(is_string($value) ? $value : ''))
                 ?? SatimLanguage::fallback();
         }
 
         return $this->language;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function data(array $data): array
     {
         if (array_key_exists('language', $data) && empty($data['language'])) {

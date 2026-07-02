@@ -33,6 +33,9 @@ final class SatimRefundRequest extends AbstractSatimRequest implements SatimRequ
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -43,6 +46,9 @@ final class SatimRefundRequest extends AbstractSatimRequest implements SatimRequ
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toRequest(): array
     {
         return array_merge($this->toArray(), [

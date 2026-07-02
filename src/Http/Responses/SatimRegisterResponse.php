@@ -20,7 +20,10 @@ class SatimRegisterResponse extends AbstractSatimResponse implements SatimRespon
         );
     }
 
-    public static function fromResponse(array $response): SatimRegisterResponse
+    /**
+     * @param  array<array-key, mixed>|null  $response
+     */
+    public static function fromResponse(?array $response): SatimRegisterResponse
     {
         $data = SatimResponseData::from($response);
 

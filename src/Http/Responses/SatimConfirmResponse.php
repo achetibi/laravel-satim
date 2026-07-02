@@ -9,6 +9,9 @@ use LaravelSatim\Enums\SatimCurrency;
 
 class SatimConfirmResponse extends AbstractSatimResponse implements SatimResponseInterface
 {
+    /**
+     * @param  array<string, mixed>  $params
+     */
     public function __construct(
         public readonly ?string $expiration = null,
         public readonly ?string $cardholderName = null,
@@ -42,7 +45,10 @@ class SatimConfirmResponse extends AbstractSatimResponse implements SatimRespons
         );
     }
 
-    public static function fromResponse(array $response): SatimConfirmResponse
+    /**
+     * @param  array<array-key, mixed>|null  $response
+     */
+    public static function fromResponse(?array $response): SatimConfirmResponse
     {
         $data = SatimResponseData::from($response);
 

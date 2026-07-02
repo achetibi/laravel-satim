@@ -8,11 +8,14 @@ use LaravelSatim\Contracts\SatimResponseInterface;
 
 class SatimRefundResponse extends AbstractSatimResponse implements SatimResponseInterface
 {
-    public static function fromResponse(array $response): SatimRefundResponse
+    /**
+     * @param  array<array-key, mixed>|null  $response
+     */
+    public static function fromResponse(?array $response): SatimRefundResponse
     {
         $data = SatimResponseData::from($response);
 
-        return new static(
+        return new self(
             errorCode: $data->string('errorCode'),
             errorMessage: $data->string('errorMessage')
         );

@@ -26,6 +26,7 @@
         "illuminate/support": "^12.0|^13.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.29",
         "orchestra/testbench": "^10.11",
         "pestphp/pest": "^3.8",
@@ -45,10 +46,12 @@
     "scripts": {
         "lint": "pint --preset psr12",
         "test:lint": "pint --preset psr12 --test",
+        "test:types": "phpstan analyse --memory-limit=512M",
         "test:inline": "pest --colors=always",
         "test:parallel": "pest --colors=always --parallel --processes=3",
         "test": [
             "@test:lint",
+            "@test:types",
             "@test:parallel"
         ]
     },

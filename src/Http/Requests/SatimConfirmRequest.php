@@ -35,6 +35,9 @@ final class SatimConfirmRequest extends AbstractSatimRequest implements SatimReq
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -45,6 +48,9 @@ final class SatimConfirmRequest extends AbstractSatimRequest implements SatimReq
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toRequest(): array
     {
         return [
