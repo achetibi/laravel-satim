@@ -27,7 +27,7 @@ it('validates order id and amount', function (array $args, string $message) {
         ->toThrow(SatimValidationException::class, $message);
 })->with([
     'empty order id' => [['orderId' => '', 'amount' => 100.0], 'The order id is required.'],
-    'long order id' => [['orderId' => str_repeat('a', 21), 'amount' => 100.0], 'The order id must not be greater than 20 characters.'],
+    'long order id' => [['orderId' => str_repeat('a', 21), 'amount' => 100.0], 'The order id must be at most 20 characters and contain no spaces.'],
     'amount below minimum' => [['orderId' => 'O1', 'amount' => 49.99], 'The amount must be at least 50.'],
     'amount too precise' => [['orderId' => 'O1', 'amount' => 100.123], 'The amount must not have more than two decimal places.'],
 ]);

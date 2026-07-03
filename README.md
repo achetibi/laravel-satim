@@ -78,16 +78,31 @@ use LaravelSatim\Contracts\SatimInterface;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
 
 $response = app(SatimInterface::class)->register(SatimRegisterRequest::make(
-    orderNumber: 'ORD-123456',   // max 10 chars, unique per transaction
+    orderNumber: 'ORD123456',    // alphanumeric, max 10 chars, unique per transaction
     amount: 1500.00,             // amount in DZD (dinars); converted to centimes internally
     returnUrl: route('payment.success'),
-    udf1: 'ORD-123456',
+    udf1: 'ORD123456',
 ));
 
 // Redirect the customer to the hosted payment page:
 return redirect()->away($response->formUrl);
 
 // Keep $response->orderId to confirm the order later.
+```
+
+For merchants enabled for **bill payment**, pass the funding type indicator (sent by
+SATIM inside `jsonParams` as `fundingTypeIndicator`):
+
+```php
+use LaravelSatim\Enums\SatimFundingType;
+
+SatimRegisterRequest::make(
+    orderNumber: 'ORD123456',
+    amount: 1500.00,
+    returnUrl: route('payment.success'),
+    udf1: 'ORD123456',
+    fundingType: SatimFundingType::BILL_PAYMENT, // "CP" (or SatimFundingType::BILL_PAYMENT_698 for "698")
+);
 ```
 
 ### 2. Confirm a transaction
@@ -150,10 +165,10 @@ use LaravelSatim\Enums\SatimLanguage;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
 
 SatimRegisterRequest::make(
-    orderNumber: 'ORD-123456',
+    orderNumber: 'ORD123456',
     amount: 1500.00,
     returnUrl: route('payment.success'),
-    udf1: 'ORD-123456',
+    udf1: 'ORD123456',
     currency: SatimCurrency::DZD,
     language: SatimLanguage::AR,
 );

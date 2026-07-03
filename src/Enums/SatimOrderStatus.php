@@ -6,11 +6,11 @@ namespace LaravelSatim\Enums;
 
 enum SatimOrderStatus: int
 {
-    case RegisteredNotPaid = 0;
-    case Declined = -1;
-    case Approved = 1;
-    case Deposited = 2;
-    case Reversed = 3;
-    case Refunded = 4;
-    case AuthorizationDeclined = 6;
+    case REGISTERED_NOT_PAID = 0;
+    case DECLINED = -1;
+    case APPROVED = 1;
+    case DEPOSITED = 2;
+    case REVERSED = 3;
+    case REFUNDED = 4;
+    case AUTHORIZATION_DECLINED = 6;
 }

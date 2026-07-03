@@ -26,9 +26,15 @@ it('leaves the language null when not provided', function () {
 
 it('validates the mdOrder', function () {
     expect(fn () => SatimConfirmRequest::make(mdOrder: ''))
-        ->toThrow(SatimValidationException::class, 'The order number is required.')
+        ->toThrow(SatimValidationException::class, 'The order id is required.')
         ->and(fn () => SatimConfirmRequest::make(mdOrder: str_repeat('a', 21)))
-        ->toThrow(SatimValidationException::class, 'The order number must not be greater than 20 characters.');
+        ->toThrow(SatimValidationException::class, 'The order id must be at most 20 characters and contain no spaces.')
+        ->and(fn () => SatimConfirmRequest::make(mdOrder: 'has space'))
+        ->toThrow(SatimValidationException::class, 'The order id must be at most 20 characters and contain no spaces.');
+});
+
+it('trims the mdOrder before validating', function () {
+    expect(SatimConfirmRequest::make(mdOrder: '  ORDER123  ')->parameters()['mdOrder'])->toBe('ORDER123');
 });
 
 it('rejects an invalid language type', function () {

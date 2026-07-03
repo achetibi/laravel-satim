@@ -153,33 +153,33 @@ final readonly class SatimConfirmResponse implements SatimResponseInterface
 
     public function registeredNotPaid(): bool
     {
-        return $this->status() === SatimOrderStatus::RegisteredNotPaid;
+        return $this->status() === SatimOrderStatus::REGISTERED_NOT_PAID;
     }
 
     public function approved(): bool
     {
-        return $this->status() === SatimOrderStatus::Approved;
+        return $this->status() === SatimOrderStatus::APPROVED;
     }
 
     public function paid(): bool
     {
-        return $this->status() === SatimOrderStatus::Deposited;
+        return $this->status() === SatimOrderStatus::DEPOSITED;
     }
 
     public function reversed(): bool
     {
-        return $this->status() === SatimOrderStatus::Reversed;
+        return $this->status() === SatimOrderStatus::REVERSED;
     }
 
     public function refunded(): bool
     {
-        return $this->status() === SatimOrderStatus::Refunded;
+        return $this->status() === SatimOrderStatus::REFUNDED;
     }
 
     public function declined(): bool
     {
-        return $this->status() === SatimOrderStatus::AuthorizationDeclined
-            || $this->status() === SatimOrderStatus::Declined;
+        return $this->status() === SatimOrderStatus::AUTHORIZATION_DECLINED
+            || $this->status() === SatimOrderStatus::DECLINED;
     }
 
     public function paymentAccepted(): bool

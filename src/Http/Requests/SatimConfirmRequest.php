@@ -7,6 +7,7 @@ namespace LaravelSatim\Http\Requests;
 use LaravelSatim\Contracts\SatimRequestInterface;
 use LaravelSatim\Enums\SatimLanguage;
 use LaravelSatim\Exceptions\SatimValidationException;
+use LaravelSatim\Support\SatimValidator;
 
 final class SatimConfirmRequest implements SatimRequestInterface
 {
@@ -17,6 +18,8 @@ final class SatimConfirmRequest implements SatimRequestInterface
         public string $mdOrder,
         public ?SatimLanguage $language = null,
     ) {
+        $this->mdOrder = trim($this->mdOrder);
+
         $this->validate();
     }
 
@@ -27,7 +30,7 @@ final class SatimConfirmRequest implements SatimRequestInterface
     {
         return new self(
             mdOrder: $mdOrder,
-            language: $language
+            language: $language,
         );
     }
 
@@ -44,16 +47,9 @@ final class SatimConfirmRequest implements SatimRequestInterface
 
     public function validate(): void
     {
-        $errors = [];
-
-        if ($this->mdOrder === '') {
-            $errors[] = 'The order number is required.';
-        } elseif (mb_strlen($this->mdOrder) > 20) {
-            $errors[] = 'The order number must not be greater than 20 characters.';
-        }
-
-        if ($errors !== []) {
-            throw new SatimValidationException($errors[0], $errors);
-        }
+        SatimValidator::make()
+            ->required($this->mdOrder, 'order id')
+            ->token($this->mdOrder, 'order id')
+            ->validate();
     }
 }
