@@ -6,18 +6,24 @@ namespace LaravelSatim\Http\Responses;
 
 use LaravelSatim\Contracts\SatimResponseInterface;
 
-class SatimRefundResponse extends AbstractSatimResponse implements SatimResponseInterface
+final readonly class SatimRefundResponse implements SatimResponseInterface
 {
+    public function __construct(
+        public ?string $errorMessage = null,
+    ) {
+    }
+
     /**
      * @param  array<array-key, mixed>|null  $response
      */
-    public static function fromResponse(?array $response): SatimRefundResponse
+    public static function fromResponse(?array $response): self
     {
-        $data = SatimResponseData::from($response);
+        $response ??= [];
+
+        $errorMessage = $response['errorMessage'] ?? null;
 
         return new self(
-            errorCode: $data->string('errorCode'),
-            errorMessage: $data->string('errorMessage')
+            errorMessage: is_scalar($errorMessage) ? (string) $errorMessage : null,
         );
     }
 }

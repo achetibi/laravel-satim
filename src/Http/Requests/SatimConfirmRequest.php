@@ -4,33 +4,29 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Requests;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use LaravelSatim\Contracts\SatimRequestInterface;
 use LaravelSatim\Enums\SatimLanguage;
-use LaravelSatim\Exceptions\SatimInvalidArgumentException;
+use LaravelSatim\Exceptions\SatimValidationException;
 
-final class SatimConfirmRequest extends AbstractSatimRequest implements SatimRequestInterface
+final class SatimConfirmRequest implements SatimRequestInterface
 {
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
     public function __construct(
-        public string $orderId,
-        public ?SatimLanguage $language = null
+        public string $mdOrder,
+        public ?SatimLanguage $language = null,
     ) {
         $this->validate();
     }
 
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
-    public static function make(
-        string $orderId,
-        ?SatimLanguage $language = null
-    ): SatimConfirmRequest {
-        return new SatimConfirmRequest(
-            orderId: $orderId,
+    public static function make(string $mdOrder, ?SatimLanguage $language = null): self
+    {
+        return new self(
+            mdOrder: $mdOrder,
             language: $language
         );
     }
@@ -38,43 +34,26 @@ final class SatimConfirmRequest extends AbstractSatimRequest implements SatimReq
     /**
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    public function parameters(): array
     {
         return [
-            'userName' => $this->userName(),
-            'password' => $this->password(),
-            'orderId' => $this->orderId,
-            'language' => $this->language,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function toRequest(): array
-    {
-        return [
-            'userName' => $this->userName(),
-            'password' => $this->password(),
-            'mdOrder' => $this->orderId,
+            'mdOrder' => $this->mdOrder,
             'language' => $this->language?->value,
         ];
     }
 
-    /**
-     * @throws SatimInvalidArgumentException
-     */
     public function validate(): void
     {
-        $validator = Validator::make($this->toArray(), [
-            'userName' => ['required', 'string', 'max:30'],
-            'password' => ['required', 'string', 'max:30'],
-            'orderId' => ['required', 'string', 'max:20'],
-            'language' => ['nullable', Rule::enum(SatimLanguage::class)],
-        ]);
+        $errors = [];
 
-        if ($validator->fails()) {
-            throw new SatimInvalidArgumentException($validator->errors()->first());
+        if ($this->mdOrder === '') {
+            $errors[] = 'The order number is required.';
+        } elseif (mb_strlen($this->mdOrder) > 20) {
+            $errors[] = 'The order number must not be greater than 20 characters.';
+        }
+
+        if ($errors !== []) {
+            throw new SatimValidationException($errors[0], $errors);
         }
     }
 }

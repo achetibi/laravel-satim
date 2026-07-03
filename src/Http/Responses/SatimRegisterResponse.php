@@ -6,32 +6,27 @@ namespace LaravelSatim\Http\Responses;
 
 use LaravelSatim\Contracts\SatimResponseInterface;
 
-class SatimRegisterResponse extends AbstractSatimResponse implements SatimResponseInterface
+final readonly class SatimRegisterResponse implements SatimResponseInterface
 {
     public function __construct(
-        public readonly ?string $orderId = null,
-        public readonly ?string $formUrl = null,
-        ?string $errorCode = null,
-        ?string $errorMessage = null
+        public ?string $orderId = null,
+        public ?string $formUrl = null,
     ) {
-        parent::__construct(
-            errorCode: $errorCode,
-            errorMessage: $errorMessage
-        );
     }
 
     /**
      * @param  array<array-key, mixed>|null  $response
      */
-    public static function fromResponse(?array $response): SatimRegisterResponse
+    public static function fromResponse(?array $response): self
     {
-        $data = SatimResponseData::from($response);
+        $response ??= [];
+
+        $orderId = $response['orderId'] ?? null;
+        $formUrl = $response['formUrl'] ?? null;
 
         return new self(
-            orderId: $data->string('orderId'),
-            formUrl: $data->string('formUrl'),
-            errorCode: $data->string('errorCode'),
-            errorMessage: $data->string('errorMessage')
+            orderId: is_scalar($orderId) ? (string) $orderId : null,
+            formUrl: is_scalar($formUrl) ? (string) $formUrl : null,
         );
     }
 }

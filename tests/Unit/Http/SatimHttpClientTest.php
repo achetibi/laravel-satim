@@ -3,146 +3,96 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Client\ConnectionException;
-use LaravelSatim\Exceptions\SatimApiServerException;
+use LaravelSatim\Exceptions\SatimConfigurationException;
+use LaravelSatim\Exceptions\SatimConnectionException;
+use LaravelSatim\Http\Requests\SatimRegisterRequest;
 use LaravelSatim\Http\SatimHttpClient;
 use LaravelSatim\Tests\TestCase;
 
 uses(TestCase::class);
 
-it('can calls the API and returns a JSON response', function () {
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/*' => Http::response(['ErrorCode' => '0']),
-    ]);
+function registerRequest(): SatimRegisterRequest
+{
+    return SatimRegisterRequest::make(
+        orderNumber: 'ORDER123',
+        amount: 100.50,
+        returnUrl: 'https://merchant.test/return',
+        udf1: 'udf1',
+    );
+}
 
-    $client = new SatimHttpClient();
+beforeEach(fn () => config()->set('satim.http_client.retry', 0));
 
-    $response = $client->call('register.do', ['key' => 'value']);
-
-    expect($response)->toBe(['ErrorCode' => '0']);
-});
-
-it('sends params in the body using POST by default', function () {
+it('injects credentials and defaults, and posts to the endpoint by default', function () {
     Http::fake(function ($request) {
         expect($request->method())->toBe('POST');
-        expect($request->url())->not->toContain('key=value');
-        expect($request->data())->toBe(['key' => 'value']);
+        expect($request->url())->toBe('https://test2.satim.dz/payment/rest/register.do');
 
-        return Http::response(['ErrorCode' => '0']);
+        $data = $request->data();
+        expect($data['userName'])->toBe('test_username')
+            ->and($data['password'])->toBe('test_password')
+            ->and($data['orderNumber'])->toBe('ORDER123')
+            ->and($data['amount'])->toBe(10050)
+            ->and($data['currency'])->toBe('012')
+            ->and($data['language'])->toBe('EN');
+
+        $jsonParams = json_decode($data['jsonParams'], true);
+        expect($jsonParams['force_terminal_id'])->toBe('test_terminal')
+            ->and($jsonParams['udf1'])->toBe('udf1');
+
+        return Http::response(['errorCode' => '0']);
     });
 
-    $client = new SatimHttpClient();
-
-    $response = $client->call('register.do', ['key' => 'value']);
-
-    expect($response)->toBe(['ErrorCode' => '0']);
+    expect(app(SatimHttpClient::class)->send('/register.do', registerRequest()))
+        ->toBe(['errorCode' => '0']);
 });
 
-it('can send params in the query string when method is GET', function () {
-    config()?->set('satim.http_client.method', 'GET');
+it('sends parameters in the query string when method is GET', function () {
+    config()->set('satim.http_client.method', 'GET');
 
     Http::fake(function ($request) {
         expect($request->method())->toBe('GET');
-        expect($request->url())->toContain('key=value');
+        expect($request->url())->toContain('userName=test_username');
 
-        return Http::response(['ErrorCode' => '0']);
+        return Http::response(['errorCode' => '0']);
     });
 
-    $client = new SatimHttpClient();
-
-    $response = $client->call('register.do', ['key' => 'value']);
-
-    expect($response)->toBe(['ErrorCode' => '0']);
+    expect(app(SatimHttpClient::class)->send('/register.do', registerRequest()))
+        ->toBe(['errorCode' => '0']);
 });
 
-it('can formats the URL correctly regardless of slashes', function () {
-    config()?->set('satim.api_url', 'https://test2.satim.dz/payment/rest/////');
+it('returns an empty array on an empty JSON body', function () {
+    Http::fake(['*' => Http::response()]);
 
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/register.do' => Http::response(['ErrorCode' => '0']),
-    ]);
-
-    $client = new SatimHttpClient();
-
-    $response = $client->call('/register.do');
-
-    expect($response)->toBe(['ErrorCode' => '0']);
+    expect(app(SatimHttpClient::class)->send('/register.do', registerRequest()))->toBe([]);
 });
 
-it('can returns null if response has empty JSON body', function () {
-    Http::fake([
-        '*' => Http::response(),
-    ]);
+it('throws a connection exception on a server error', function () {
+    Http::fake(['*' => Http::response('Internal Server Error', 500)]);
 
-    $client = new SatimHttpClient();
+    app(SatimHttpClient::class)->send('/register.do', registerRequest());
+})->throws(SatimConnectionException::class, 'Server Error: Internal Server Error (500).');
 
-    $response = $client->call('register.do');
-
-    expect($response)->toBeNull();
-});
-
-it('throws exception on server error', function () {
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
-    ]);
-
-    $client = new SatimHttpClient();
-
-    $client->call('register.do');
-})->throws(SatimApiServerException::class, 'Server Error: Internal Server Error (500).');
-
-it('throws exception if API URL is not configured', function () {
-    config()?->set('satim.api_url', null);
-
-    $client = new SatimHttpClient();
-
-    $client->call('register.do');
-})->throws(SatimApiServerException::class, 'SATIM API URL is not configured.');
-
-it('throws exception on connection failure', function () {
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
-    ]);
-
-    $client = new SatimHttpClient();
-
-    $client->call('register.do');
-})->throws(SatimApiServerException::class, 'Connection failed');
-
-it('throws if satim.api_url config is empty', function () {
-    config()?->set('satim.api_url', '');
-
-    $client = new SatimHttpClient();
-    $client->call('any');
-})->throws(SatimApiServerException::class, 'SATIM API URL is not configured.');
-
-it('preserves the original throwable as the previous exception', function () {
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/*' => fn () => throw new ConnectionException('Connection failed'),
-    ]);
-
-    $client = new SatimHttpClient();
+it('wraps a transport failure and preserves the previous exception', function () {
+    Http::fake(['*' => fn () => throw new ConnectionException('Connection failed')]);
 
     try {
-        $client->call('register.do');
-        $this->fail('Expected a SatimApiServerException to be thrown.');
-    } catch (SatimApiServerException $e) {
-        expect($e->getPrevious())->toBeInstanceOf(ConnectionException::class)
-            ->and($e->getMessage())->toBe('Connection failed');
+        app(SatimHttpClient::class)->send('/register.do', registerRequest());
+        $this->fail('Expected a SatimConnectionException.');
+    } catch (SatimConnectionException $e) {
+        expect($e->getMessage())->toBe('Connection failed')
+            ->and($e->getPrevious())->toBeInstanceOf(ConnectionException::class);
     }
 });
 
-it('does not double-wrap its own server error exception', function () {
-    Http::fake([
-        'https://test2.satim.dz/payment/rest/*' => Http::response('Internal Server Error', 500, ['Content-Type' => 'application/json']),
-    ]);
+it('throws a configuration exception when the API URL is missing', function () {
+    config()->set('satim.api_url', null);
 
-    $client = new SatimHttpClient();
+    app(SatimHttpClient::class);
+})->throws(SatimConfigurationException::class, 'SATIM API URL is not configured.');
 
-    try {
-        $client->call('register.do');
-        $this->fail('Expected a SatimApiServerException to be thrown.');
-    } catch (SatimApiServerException $e) {
-        expect($e->getPrevious())->toBeNull()
-            ->and($e->getMessage())->toBe('Server Error: Internal Server Error (500).');
-    }
-});
+it('throws a configuration exception when credentials are missing', function () {
+    config()->set('satim.username', null);
+
+    app(SatimHttpClient::class);
+})->throws(SatimConfigurationException::class, 'SATIM credential [username] is not configured.');

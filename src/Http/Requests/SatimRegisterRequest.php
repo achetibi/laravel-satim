@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Requests;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use LaravelSatim\Contracts\SatimRequestInterface;
 use LaravelSatim\Enums\SatimCurrency;
 use LaravelSatim\Enums\SatimLanguage;
-use LaravelSatim\Exceptions\SatimInvalidArgumentException;
+use LaravelSatim\Exceptions\SatimValidationException;
 
-final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRequestInterface
+final class SatimRegisterRequest implements SatimRequestInterface
 {
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
     public function __construct(
         public string $orderNumber,
@@ -28,13 +26,13 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         public ?string $failUrl = null,
         public ?string $description = null,
         public ?SatimCurrency $currency = null,
-        public ?SatimLanguage $language = null
+        public ?SatimLanguage $language = null,
     ) {
         $this->validate();
     }
 
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
     public static function make(
         string $orderNumber,
@@ -48,9 +46,9 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
         ?string $failUrl = null,
         ?string $description = null,
         ?SatimCurrency $currency = null,
-        ?SatimLanguage $language = null
-    ): SatimRegisterRequest {
-        return new SatimRegisterRequest(
+        ?SatimLanguage $language = null,
+    ): self {
+        return new self(
             orderNumber: $orderNumber,
             amount: $amount,
             returnUrl: $returnUrl,
@@ -62,78 +60,81 @@ final class SatimRegisterRequest extends AbstractSatimRequest implements SatimRe
             failUrl: $failUrl,
             description: $description,
             currency: $currency,
-            language: $language
+            language: $language,
         );
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    public function parameters(): array
     {
         return [
-            'userName' => $this->userName(),
-            'password' => $this->password(),
             'orderNumber' => $this->orderNumber,
-            'amount' => $this->amount,
-            'currency' => $this->currency,
+            'amount' => (int) round($this->amount * 100),
+            'currency' => $this->currency?->value,
             'returnUrl' => $this->returnUrl,
             'failUrl' => $this->failUrl,
             'description' => $this->description,
-            'language' => $this->language,
-            'jsonParams' => [
-                'force_terminal_id' => $this->terminal(),
+            'language' => $this->language?->value,
+            'jsonParams' => array_filter([
                 'udf1' => $this->udf1,
                 'udf2' => $this->udf2,
                 'udf3' => $this->udf3,
                 'udf4' => $this->udf4,
                 'udf5' => $this->udf5,
-            ],
+            ], static fn (?string $value): bool => $value !== null && $value !== ''),
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function toRequest(): array
-    {
-        $data = $this->toArray();
-        $jsonParams = is_array($data['jsonParams']) ? array_filter($data['jsonParams']) : [];
-
-        return array_merge($data, [
-            'amount' => (int) round($this->amount * 100),
-            'currency' => $this->currency?->value,
-            'language' => $this->language?->value,
-            'jsonParams' => json_encode($jsonParams),
-        ]);
-    }
-
-    /**
-     * @throws SatimInvalidArgumentException
-     */
     public function validate(): void
     {
-        $validator = Validator::make($this->toArray(), [
-            'userName' => ['required', 'string', 'max:30'],
-            'password' => ['required', 'string', 'max:30'],
-            'orderNumber' => ['required', 'string', 'max:10'],
-            'amount' => ['required', 'decimal:0,2', 'min:50'],
-            'currency' => ['nullable', Rule::enum(SatimCurrency::class)],
-            'returnUrl' => ['required', 'url', 'max:512'],
-            'failUrl' => ['nullable', 'url', 'max:512'],
-            'description' => ['nullable', 'string', 'max:512'],
-            'language' => ['nullable', Rule::enum(SatimLanguage::class)],
-            'jsonParams' => ['array'],
-            'jsonParams.force_terminal_id' => ['required', 'string', 'max:16'],
-            'jsonParams.udf1' => ['required', 'string', 'max:20'],
-            'jsonParams.udf2' => ['nullable', 'string', 'max:20'],
-            'jsonParams.udf3' => ['nullable', 'string', 'max:20'],
-            'jsonParams.udf4' => ['nullable', 'string', 'max:20'],
-            'jsonParams.udf5' => ['nullable', 'string', 'max:20'],
-        ]);
+        $errors = [];
 
-        if ($validator->fails()) {
-            throw new SatimInvalidArgumentException($validator->errors()->first());
+        if ($this->orderNumber === '') {
+            $errors[] = 'The order number is required.';
+        } elseif (mb_strlen($this->orderNumber) > 10) {
+            $errors[] = 'The order number must not be greater than 10 characters.';
+        }
+
+        if ($this->amount < 50) {
+            $errors[] = 'The amount must be at least 50.';
+        } elseif (round($this->amount, 2) !== $this->amount) {
+            $errors[] = 'The amount must not have more than two decimal places.';
+        }
+
+        if ($this->returnUrl === '') {
+            $errors[] = 'The return URL is required.';
+        } elseif (filter_var($this->returnUrl, FILTER_VALIDATE_URL) === false) {
+            $errors[] = 'The return URL must be a valid URL.';
+        } elseif (mb_strlen($this->returnUrl) > 512) {
+            $errors[] = 'The return URL must not be greater than 512 characters.';
+        }
+
+        if ($this->failUrl !== null) {
+            if (filter_var($this->failUrl, FILTER_VALIDATE_URL) === false) {
+                $errors[] = 'The fail URL must be a valid URL.';
+            } elseif (mb_strlen($this->failUrl) > 512) {
+                $errors[] = 'The fail URL must not be greater than 512 characters.';
+            }
+        }
+
+        if ($this->description !== null && mb_strlen($this->description) > 512) {
+            $errors[] = 'The description must not be greater than 512 characters.';
+        }
+
+        if ($this->udf1 === '') {
+            $errors[] = 'The udf1 field is required.';
+        }
+
+        foreach (['udf1' => $this->udf1, 'udf2' => $this->udf2, 'udf3' => $this->udf3, 'udf4' => $this->udf4, 'udf5' => $this->udf5] as $name => $value) {
+            if ($value !== null && mb_strlen($value) > 20) {
+                $errors[] = "The {$name} field must not be greater than 20 characters.";
+            }
+        }
+
+        if ($errors !== []) {
+            throw new SatimValidationException($errors[0], $errors);
         }
     }
 }

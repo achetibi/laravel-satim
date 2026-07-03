@@ -6,7 +6,8 @@ Only the latest stable version of Laravel Satim is actively supported.
 
 | Version | Supported |
 |---------|-----------|
-| 1.x     | ✅        |
+| 2.x     | ✅        |
+| 1.x     | ❌        |
 | < 1.0   | ❌        |
 
 ---

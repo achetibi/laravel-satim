@@ -3,21 +3,23 @@
 declare(strict_types=1);
 
 use LaravelSatim\Contracts\SatimResponseInterface;
-use LaravelSatim\Http\Responses\AbstractSatimResponse;
 use LaravelSatim\Http\Responses\SatimRegisterResponse;
-use LaravelSatim\Tests\TestCase;
 
-uses(TestCase::class);
+it('parses the register response fields', function () {
+    $response = SatimRegisterResponse::fromResponse([
+        'errorCode' => '0',
+        'orderId' => 'QNA1IhS444MlTAAAGN6I',
+        'formUrl' => 'https://test2.satim.dz/payment/...',
+    ]);
 
-it('should extends and implements satim response classes', function () {
-    expect(SatimRegisterResponse::fromResponse(
-        confirmEndpoint([
-            'errorCode' => '0',
-            'orderId' => 'QNA1IhS444MlTAAAGN6I',
-            'formUrl' => 'https://fake.satim.dz/payment/merchants/merchant1/payment_fr.html?mdOrder=QNA1IhS444MlTAAAGN6I',
-        ])
-    ))
-        ->toBeInstanceOf(SatimRegisterResponse::class)
-        ->toBeInstanceOf(AbstractSatimResponse::class)
-        ->toBeInstanceOf(SatimResponseInterface::class);
+    expect($response)->toBeInstanceOf(SatimResponseInterface::class)
+        ->and($response->orderId)->toBe('QNA1IhS444MlTAAAGN6I')
+        ->and($response->formUrl)->toBe('https://test2.satim.dz/payment/...');
+});
+
+it('handles an empty response gracefully', function () {
+    $response = SatimRegisterResponse::fromResponse(null);
+
+    expect($response->orderId)->toBeNull()
+        ->and($response->formUrl)->toBeNull();
 });

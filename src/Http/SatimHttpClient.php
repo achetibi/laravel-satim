@@ -6,90 +6,87 @@ namespace LaravelSatim\Http;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use LaravelSatim\Exceptions\SatimApiServerException;
+use LaravelSatim\Contracts\SatimRequestInterface;
+use LaravelSatim\Enums\SatimCurrency;
+use LaravelSatim\Enums\SatimLanguage;
+use LaravelSatim\Exceptions\SatimConnectionException;
+use LaravelSatim\Support\SatimCredentials;
 use Throwable;
 
-class SatimHttpClient
+readonly class SatimHttpClient
 {
     /**
-     * @param  array<string, mixed>  $data
-     * @return array<array-key, mixed>|null
-     *
-     * @throws SatimApiServerException
+     * @param  array<string, mixed>  $httpOptions
      */
-    public function call(string $endpoint, array $data = []): ?array
+    public function __construct(
+        private SatimCredentials $credentials,
+        private string $baseUrl,
+        private SatimCurrency $defaultCurrency,
+        private SatimLanguage $defaultLanguage,
+        private string $method = 'POST',
+        private int $retry = 0,
+        private int $retryDelay = 1,
+        private array $httpOptions = [],
+    ) {
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     *
+     * @throws SatimConnectionException
+     */
+    public function send(string $endpoint, SatimRequestInterface $request): array
     {
+        $payload = $this->assemble($request->parameters());
+
         try {
-            $retry = $this->intConfig('satim.http_client.retry', 0);
-            $sleeptime = $this->intConfig('satim.http_client.sleeptime', 1);
-            $method = strtolower($this->stringConfig('satim.http_client.method', 'POST'));
+            $http = Http::withOptions($this->httpOptions)
+                ->when($this->retry > 0, fn (PendingRequest $r) => $r->retry($this->retry, $this->retryDelay));
 
-            $request = Http::withOptions($this->options())
-                ->when($retry > 0, fn (PendingRequest $http) => $http->retry($retry, $sleeptime));
-
-            $response = $method === 'get'
-                ? $request->get($this->getEndpoint($endpoint), $data)
-                : $request->asForm()->post($this->getEndpoint($endpoint), $data);
-        } catch (SatimApiServerException $e) {
-            throw $e;
+            $response = strtolower($this->method) === 'get'
+                ? $http->get($this->url($endpoint), $payload)
+                : $http->asForm()->post($this->url($endpoint), $payload);
         } catch (Throwable $e) {
-            throw new SatimApiServerException($e->getMessage(), previous: $e);
+            throw new SatimConnectionException($e->getMessage(), 0, [], $e);
         }
 
         if ($response->successful() === false) {
-            throw new SatimApiServerException("Server Error: {$response->reason()} ({$response->status()}).");
+            throw new SatimConnectionException("Server Error: {$response->reason()} ({$response->status()}).");
         }
 
         $json = $response->json();
 
-        return is_array($json) ? $json : null;
+        return is_array($json) ? $json : [];
     }
 
     /**
-     * @throws SatimApiServerException
-     */
-    protected function getApiUrl(): string
-    {
-        $apiUrl = $this->stringConfig('satim.api_url', '');
-        $apiUrl === '' && throw new SatimApiServerException('SATIM API URL is not configured.');
-
-        return $apiUrl;
-    }
-
-    /**
-     * @throws SatimApiServerException
-     */
-    protected function getEndpoint(string $endpoint): string
-    {
-        return implode('/', [
-            rtrim($this->getApiUrl(), '/'),
-            ltrim($endpoint, '/'),
-        ]);
-    }
-
-    /**
+     * @param  array<string, mixed>  $parameters
      * @return array<string, mixed>
      */
-    protected function options(): array
+    private function assemble(array $parameters): array
     {
-        return [
-            'verify' => config('satim.http_options.verify', true),
-            'allow_redirects' => config('satim.http_options.allow_redirects', false),
-            'timeout' => $this->intConfig('satim.http_options.timeout', 30),
-        ];
+        $parameters['userName'] = $this->credentials->userName;
+        $parameters['password'] = $this->credentials->password;
+
+        if (array_key_exists('currency', $parameters) && ($parameters['currency'] === null || $parameters['currency'] === '')) {
+            $parameters['currency'] = $this->defaultCurrency->value;
+        }
+
+        if (array_key_exists('language', $parameters) && ($parameters['language'] === null || $parameters['language'] === '')) {
+            $parameters['language'] = $this->defaultLanguage->value;
+        }
+
+        if (array_key_exists('jsonParams', $parameters) && is_array($parameters['jsonParams'])) {
+            $jsonParams = $parameters['jsonParams'];
+            $jsonParams['force_terminal_id'] = $this->credentials->terminal;
+            $parameters['jsonParams'] = json_encode($jsonParams);
+        }
+
+        return $parameters;
     }
 
-    private function intConfig(string $key, int $default): int
+    private function url(string $endpoint): string
     {
-        $value = config($key, $default);
-
-        return is_numeric($value) ? (int) $value : $default;
-    }
-
-    private function stringConfig(string $key, string $default): string
-    {
-        $value = config($key, $default);
-
-        return is_string($value) ? $value : $default;
+        return implode('/', [rtrim($this->baseUrl, '/'), ltrim($endpoint, '/')]);
     }
 }

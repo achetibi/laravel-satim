@@ -14,8 +14,7 @@
     "authors": [
         {
             "name": "Abderrahim CHETIBI",
-            "email": "chetibi.abderrahim@gmail.com",
-            "role": "Developer"
+            "email": "chetibi.abderrahim@gmail.com"
         }
     ],
     "require": {
@@ -68,7 +67,7 @@
                 "LaravelSatim\\SatimServiceProvider"
             ],
             "aliases": {
-                "LaravelSatim": "LaravelSatim\\SatimFacade"
+                "Satim": "LaravelSatim\\Facades\\Satim"
             }
         }
     }

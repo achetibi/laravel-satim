@@ -3,108 +3,86 @@
 declare(strict_types=1);
 
 return [
+
     /*
     |--------------------------------------------------------------------------
-    | API URL
+    | API Endpoint
     |--------------------------------------------------------------------------
     |
-    | You can configure the API endpoint for production or test environments
+    | Base URL of the SATIM REST API. It defaults to the test sandbox; switch
+    | to the production URL provided by your bank when going live.
     |
     */
+
     'api_url' => env('SATIM_API_URL', 'https://test2.satim.dz/payment/rest'),
 
     /*
     |--------------------------------------------------------------------------
-    | API Username
+    | Merchant Credentials
     |--------------------------------------------------------------------------
     |
-    | Username used to connect to the SATIM API
-    | To get a username, visit: https://cibweb.dz/fr/
+    | The username, password and terminal identifier issued to your merchant
+    | account. Request them from your bank (CIB): https://cibweb.dz
     |
     */
+
     'username' => env('SATIM_USERNAME'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | API Password
-    |--------------------------------------------------------------------------
-    |
-    | Password used to connect to the SATIM API
-    | To get a password, visit: https://cibweb.dz/fr/
-    |
-    */
     'password' => env('SATIM_PASSWORD'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | API Terminal
-    |--------------------------------------------------------------------------
-    |
-    | Terminal ID used to connect to the SATIM API
-    | To get a terminal ID, visit: https://cibweb.dz/fr/
-    |
-    */
     'terminal' => env('SATIM_TERMINAL'),
 
     /*
     |--------------------------------------------------------------------------
-    | API language
+    | Localization
     |--------------------------------------------------------------------------
     |
-    | The language used in the SATIM API
-    | Possible values are: 'AR', 'EN', 'FR'. You can use the SatimLanguage enum
+    | Default language and currency applied when a request does not specify
+    | them explicitly.
+    |
+    | - language: 'AR', 'EN' or 'FR' (ISO 639-1). See the SatimLanguage enum.
+    | - currency: only 'DZD' (ISO 4217 code 012) is currently supported by
+    |   SATIM. See the SatimCurrency enum.
     |
     */
-    'language' => env('SATIM_LANGUAGE', 'en'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | API currency
-    |--------------------------------------------------------------------------
-    |
-    | The currency used to make payments
-    | Possible values are: 'EUR', 'DZD', 'USD'. You can use the SatimCurrency enum
-    |
-    */
+    'language' => env('SATIM_LANGUAGE', 'EN'),
     'currency' => env('SATIM_CURRENCY', 'DZD'),
 
     /*
     |--------------------------------------------------------------------------
-    | HTTP Client Options
+    | HTTP Transport Options
     |--------------------------------------------------------------------------
     |
-    | These options are passed directly to the underlying Guzzle HTTP client
-    | used by Laravel's HTTP facade.
+    | Options forwarded to Laravel's HTTP client (Guzzle) for every request.
     |
-    | - "verify": Set to false only in development or testing environments.
-    | - "allow_redirects": Set to true to automatically follow redirects.
-    | - "timeout": The timeout used in the SATIM API requests
+    | - timeout: request timeout, in seconds.
+    | - verify: TLS certificate verification. Disable only in local development.
+    | - allow_redirects: follow HTTP redirects automatically.
     |
     */
+
     'http_options' => [
+        'timeout' => env('SATIM_HTTP_TIMEOUT', 30),
         'verify' => env('SATIM_HTTP_VERIFY_SSL', true),
         'allow_redirects' => env('SATIM_HTTP_ALLOW_REDIRECTS', false),
-        'timeout' => env('SATIM_HTTP_TIMEOUT', 30),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | HTTP Client Configuration
+    | HTTP Client Behaviour
     |--------------------------------------------------------------------------
     |
-    | Defines how the HTTP client should handle temporary network errors
-    | when communicating with the SATIM API.
-    |
-    | - "method": The HTTP verb used for API requests. SATIM strongly recommends
-    |   "POST" so that sensitive data is not exposed in URLs, logs or browser
-    |   history. Use "GET" only if explicitly required.
-    | - "retry": The number of retry attempts before failing the request.
-    | - "sleeptime": The delay (in milliseconds) between each retry attempt.
+    | - method: HTTP verb used for API calls. SATIM strongly recommends 'POST'
+    |   so sensitive data is never exposed in URLs, logs or browser history.
+    |   Use 'GET' only if explicitly required.
+    | - retry: number of retry attempts for transient network failures.
+    | - sleeptime: delay between retries, in milliseconds.
     |
     */
+
     'http_client' => [
         'method' => env('SATIM_HTTP_CLIENT_METHOD', 'POST'),
         'retry' => env('SATIM_HTTP_CLIENT_RETRY', 3),
         'sleeptime' => env('SATIM_HTTP_CLIENT_SLEEPTIME', 300),
     ],
+
 ];

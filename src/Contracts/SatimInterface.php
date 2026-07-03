@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Contracts;
 
-use LaravelSatim\Exceptions\SatimApiServerException;
+use LaravelSatim\Exceptions\SatimConnectionException;
+use LaravelSatim\Exceptions\SatimResponseException;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 use LaravelSatim\Http\Requests\SatimRefundRequest;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
@@ -14,15 +15,21 @@ use LaravelSatim\Http\Responses\SatimRegisterResponse;
 
 interface SatimInterface
 {
+    /**
+     * @throws SatimConnectionException
+     * @throws SatimResponseException
+     */
     public function register(SatimRegisterRequest $request): SatimRegisterResponse;
 
     /**
-     * @throws SatimApiServerException
+     * @throws SatimConnectionException
+     * @throws SatimResponseException
      */
     public function confirm(SatimConfirmRequest $request): SatimConfirmResponse;
 
     /**
-     * @throws SatimApiServerException
+     * @throws SatimConnectionException
+     * @throws SatimResponseException
      */
     public function refund(SatimRefundRequest $request): SatimRefundResponse;
 }

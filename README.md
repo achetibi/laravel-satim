@@ -3,23 +3,23 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/achetibi/laravel-satim.svg?style=flat-square)](https://packagist.org/packages/achetibi/laravel-satim)
 [![Total Downloads](https://img.shields.io/packagist/dt/achetibi/laravel-satim.svg?style=flat-square)](https://packagist.org/packages/achetibi/laravel-satim)
 [![Tests](https://img.shields.io/github/actions/workflow/status/achetibi/laravel-satim/tests.yml?label=tests)](https://github.com/achetibi/laravel-satim/actions)
+[![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg?style=flat-square)](phpstan.neon)
 [![License](https://img.shields.io/github/license/achetibi/laravel-satim)](LICENSE.md)
 
-**Laravel Satim** is a clean, extensible Laravel package that provides seamless integration with the **Satim** online payment gateway.  
-It supports full transaction lifecycle handling: registration, confirmation, and refund, all wrapped in a service-oriented architecture.
+**Laravel Satim** is a clean, strongly-typed Laravel package that integrates the **SATIM / CIB** online payment gateway.
+It covers the full transaction lifecycle — registration, confirmation and refund — behind pure request DTOs, immutable response objects and a real exception hierarchy.
 
 ---
 
 ## 🚀 Features
 
 - Simple configuration via `.env`
-- Clean service classes for payment flow:
-    - Register
-    - Confirm
-    - Refund
-- Built-in error handling and response abstraction
-- Custom HTTP client wrapper using Laravel's `Http` facade
-- Laravel-native setup with service provider, config, and facade
+- Register / Confirm / Refund operations
+- **Immutable, typed responses** — each response owns its own data
+- **Rich confirmation helpers** — `cardValid()`, `cardBalanceInsufficient()`, `status()`, `paid()`, `declined()`, …
+- **Real exception hierarchy** driven by the official SATIM error codes
+- Credentials injected into the HTTP client (requests stay pure data-transfer objects)
+- Analysed at **PHPStan level 10** and formatted with **Pint (PSR-12)**
 
 ---
 
@@ -36,7 +36,7 @@ composer require achetibi/laravel-satim
 Publish the config file:
 
 ```bash
-php artisan vendor:publish --provider="LaravelSatim\SatimServiceProvider"
+php artisan vendor:publish --provider="LaravelSatim\SatimServiceProvider" --tag="config"
 ```
 
 Add the following variables to your `.env`:
@@ -45,52 +45,81 @@ Add the following variables to your `.env`:
 SATIM_USERNAME=your_username
 SATIM_PASSWORD=your_password
 SATIM_TERMINAL=your_terminal
-SATIM_LANGUAGE=fr
+SATIM_LANGUAGE=FR
 SATIM_CURRENCY=DZD
-SATIM_API_URL=https://fake.satim.dz/payment/rest
+SATIM_API_URL=https://test2.satim.dz/payment/rest
 ```
 
-You can also set the http client configuration in the `config/satim.php` using your `.env` file:
+Optional HTTP client settings:
+
 ```env
-SATIM_HTTP_VERIFY_SSL=true
-SATIM_HTTP_TIMEOUT=30
+# SATIM strongly recommends POST so credentials are not exposed in URLs/logs.
+SATIM_HTTP_CLIENT_METHOD=POST
 SATIM_HTTP_CLIENT_RETRY=3
 SATIM_HTTP_CLIENT_SLEEPTIME=300
+
+SATIM_HTTP_VERIFY_SSL=true
+SATIM_HTTP_ALLOW_REDIRECTS=false
+SATIM_HTTP_TIMEOUT=30
 ```
 
-You can disable SSL verification in development environments only.
-You can also set the number of retries and the sleep time between each retry for failed requests.
+Disable SSL verification in development environments only. `RETRY` / `SLEEPTIME` control automatic retries (and the delay in milliseconds) for failed requests.
 
 ---
 
-## 🧠 Basic Usage
+## 🧠 Usage
 
-### Register a transaction
+You can resolve the service from the container (`SatimInterface`) or use the `Satim` facade — both share the same instance.
+
+### 1. Register a transaction
 
 ```php
 use LaravelSatim\Contracts\SatimInterface;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
 
 $response = app(SatimInterface::class)->register(SatimRegisterRequest::make(
-    orderNumber: 'ORD-123456',
-    amount: 1500,
+    orderNumber: 'ORD-123456',   // max 10 chars, unique per transaction
+    amount: 1500.00,             // amount in DZD (dinars); converted to centimes internally
     returnUrl: route('payment.success'),
-    udf1: 'ORD-123456'
+    udf1: 'ORD-123456',
 ));
+
+// Redirect the customer to the hosted payment page:
+return redirect()->away($response->formUrl);
+
+// Keep $response->orderId to confirm the order later.
 ```
 
-### Confirm a transaction
+### 2. Confirm a transaction
+
+After the customer pays and is redirected back to your `returnUrl`, confirm the order.
+The `mdOrder` is the gateway order identifier returned by `register` as `$response->orderId`:
 
 ```php
 use LaravelSatim\Contracts\SatimInterface;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 
 $response = app(SatimInterface::class)->confirm(SatimConfirmRequest::make(
-    orderId: 'BnTjnFDzZSP97QXu8FXq'
+    mdOrder: 'BnTjnFDzZSP97QXu8FXq',
 ));
+
+if ($response->paymentAccepted()) {
+    // Payment captured successfully.
+} elseif ($response->cardBalanceInsufficient()) {
+    // Insufficient funds.
+} elseif ($response->declined()) {
+    // Any other decline — inspect $response->errorMessage().
+}
 ```
 
-### Refund a transaction
+A **declined card is a business outcome, not an exception**: `confirm()` returns a
+`SatimConfirmResponse` you can inspect. Available helpers include:
+
+- Outcome: `successful()`, `fail()`, `paymentAccepted()`, `status()` (a `SatimOrderStatus` enum)
+- Lifecycle: `paid()`, `approved()`, `declined()`, `reversed()`, `refunded()`, `registeredNotPaid()`
+- Decline reasons: `cardValid()`, `cardTemporarilyBlocked()`, `cardLost()`, `cardStolen()`, `cardInvalidExpiryDate()`, `cardUnavailable()`, `cardLimitExceeded()`, `cardBalanceInsufficient()`, `cardInvalidCVV2()`, `cardExceededPasswordAttempts()`, `cardNotAuthorizedForOnlinePayment()`, `cardInactiveForOnlinePayment()`, `cardExpired()`, `cardExceededTransactionCeiling()`
+
+### 3. Refund a transaction
 
 ```php
 use LaravelSatim\Contracts\SatimInterface;
@@ -98,51 +127,98 @@ use LaravelSatim\Http\Requests\SatimRefundRequest;
 
 $response = app(SatimInterface::class)->refund(SatimRefundRequest::make(
     orderId: 'BnTjnFDzZSP97QXu8FXq',
-    amount: 1500
+    amount: 1500.00,
 ));
 ```
 
-All services return typed response or throw custom exceptions for errors.
+### Using the facade
+
+```php
+use LaravelSatim\Facades\Satim;
+
+$response = Satim::register(SatimRegisterRequest::make(/* ... */));
+```
+
+### Overriding language and currency
+
+Language and currency default to your `.env` values. Override them **per request**
+directly on the request DTO:
+
+```php
+use LaravelSatim\Enums\SatimCurrency;
+use LaravelSatim\Enums\SatimLanguage;
+use LaravelSatim\Http\Requests\SatimRegisterRequest;
+
+SatimRegisterRequest::make(
+    orderNumber: 'ORD-123456',
+    amount: 1500.00,
+    returnUrl: route('payment.success'),
+    udf1: 'ORD-123456',
+    currency: SatimCurrency::DZD,
+    language: SatimLanguage::AR,
+);
+```
 
 ---
 
-### Overriding language and currency (optional)
+## ⚠️ Error handling
 
-By default, the values for language and currency are loaded from your `.env` file.  
-If you need to override them on a per-request basis, you can call `setLanguage()` and `setCurrency()` on the service before executing the request:
+API-level errors (invalid credentials, unknown order, system errors…) raise **typed
+exceptions**; card declines during confirmation do **not** (see above).
 
 ```php
-use LaravelSatim\Contracts\SatimInterface;
-use LaravelSatim\Enums\SatimLanguage;
-use LaravelSatim\Enums\SatimCurrency;
+use LaravelSatim\Exceptions\SatimAuthenticationException;
+use LaravelSatim\Exceptions\SatimConnectionException;
+use LaravelSatim\Exceptions\SatimException;
+use LaravelSatim\Exceptions\SatimPaymentException;
+use LaravelSatim\Exceptions\SatimValidationException;
 
-$service = app(SatimInterface::class)
-    ->setLanguage(SatimLanguage::AR)
-    ->setCurrency(SatimCurrency::DZD);
-
-$response = $service->register(SatimRegisterRequest::make(
-    orderNumber: 'ORD-123456',
-    amount: 1500,
-    returnUrl: route('payment.success'),
-    udf1: 'ORD-123456'
-));
+try {
+    $response = app(SatimInterface::class)->register($request);
+} catch (SatimValidationException $e) {
+    // Invalid request data (thrown before the request is sent) — $e->errors()
+} catch (SatimAuthenticationException $e) {
+    // Access denied / merchant must change password (SATIM code 5)
+} catch (SatimPaymentException $e) {
+    // Order / payment error — $e->errorCode(), $e->context()
+} catch (SatimConnectionException $e) {
+    // Network / transport failure — $e->getPrevious()
+} catch (SatimException $e) {
+    // Base type: catch-all for any SATIM error
+}
 ```
 
-## ✅ Testing
+Exception hierarchy:
 
-Run the test suite:
+```
+SatimException (base)
+├── SatimConfigurationException   // missing credentials / API URL
+├── SatimValidationException      // request DTO validation (->errors())
+├── SatimConnectionException      // transport / HTTP failure
+└── SatimResponseException        // SATIM returned an error code (->errorCode(), ->context())
+    ├── SatimAuthenticationException
+    └── SatimPaymentException
+```
+
+---
+
+## ✅ Testing
 
 ```bash
 composer test
 ```
+
+Runs Pint (PSR-12), PHPStan (level 10) and the Pest suite. The 15 official SATIM test
+cards are covered as a data-driven suite. A live sandbox harness is available under
+`tests/Integration` (opt-in via `SATIM_INTEGRATION=1` and real credentials).
 
 ---
 
 ## 📌 Roadmap
 
 - [x] Register / Confirm / Refund operations
-- [x] Request / Response validation layer
-- [x] Exception mapping
+- [x] Native request validation layer
+- [x] Typed exception mapping from SATIM error codes
 - [x] End-to-end test suite with fake HTTP responses
 - [ ] Status operation
 - [ ] Webhook support
@@ -164,5 +240,5 @@ If you discover any security-related issues, please email **chetibi.abderrahim@g
 
 ## 📄 License
 
-The MIT License (MIT).  
+The MIT License (MIT).
 See [LICENSE.md](LICENSE.md) for full license text.

@@ -4,72 +4,58 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Requests;
 
-use Illuminate\Support\Facades\Validator;
 use LaravelSatim\Contracts\SatimRequestInterface;
-use LaravelSatim\Exceptions\SatimInvalidArgumentException;
+use LaravelSatim\Exceptions\SatimValidationException;
 
-final class SatimRefundRequest extends AbstractSatimRequest implements SatimRequestInterface
+final class SatimRefundRequest implements SatimRequestInterface
 {
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
     public function __construct(
         public string $orderId,
-        public float $amount
+        public float $amount,
     ) {
         $this->validate();
     }
 
     /**
-     * @throws SatimInvalidArgumentException
+     * @throws SatimValidationException
      */
-    public static function make(
-        string $orderId,
-        float $amount
-    ): SatimRefundRequest {
-        return new SatimRefundRequest(
-            orderId: $orderId,
-            amount: $amount
-        );
+    public static function make(string $orderId, float $amount): self
+    {
+        return new self(orderId: $orderId, amount: $amount);
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    public function parameters(): array
     {
         return [
-            'userName' => $this->userName(),
-            'password' => $this->password(),
             'orderId' => $this->orderId,
-            'amount' => $this->amount,
+            'amount' => (int) round($this->amount * 100),
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function toRequest(): array
-    {
-        return array_merge($this->toArray(), [
-            'amount' => (int) round($this->amount * 100),
-        ]);
-    }
-
-    /**
-     * @throws SatimInvalidArgumentException
-     */
     public function validate(): void
     {
-        $validator = Validator::make($this->toArray(), [
-            'userName' => ['required', 'string', 'max:30'],
-            'password' => ['required', 'string', 'max:30'],
-            'orderId' => ['required', 'string', 'max:20'],
-            'amount' => ['required', 'decimal:0,2', 'min:50'],
-        ]);
+        $errors = [];
 
-        if ($validator->fails()) {
-            throw new SatimInvalidArgumentException($validator->errors()->first());
+        if ($this->orderId === '') {
+            $errors[] = 'The order id is required.';
+        } elseif (mb_strlen($this->orderId) > 20) {
+            $errors[] = 'The order id must not be greater than 20 characters.';
+        }
+
+        if ($this->amount < 50) {
+            $errors[] = 'The amount must be at least 50.';
+        } elseif (round($this->amount, 2) !== $this->amount) {
+            $errors[] = 'The amount must not have more than two decimal places.';
+        }
+
+        if ($errors !== []) {
+            throw new SatimValidationException($errors[0], $errors);
         }
     }
 }
