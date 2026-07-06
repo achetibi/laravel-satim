@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelSatim\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use LaravelSatim\Contracts\SatimGatewayInterface;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 use LaravelSatim\Http\Requests\SatimRefundRequest;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
@@ -17,12 +18,12 @@ use LaravelSatim\Http\Responses\SatimRegisterResponse;
  * @method static SatimConfirmResponse confirm(SatimConfirmRequest $request)
  * @method static SatimRefundResponse refund(SatimRefundRequest $request)
  *
- * @see \LaravelSatim\Satim
+ * @see \LaravelSatim\SatimGateway
  */
 class Satim extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'laravel-satim';
+        return SatimGatewayInterface::class;
     }
 }

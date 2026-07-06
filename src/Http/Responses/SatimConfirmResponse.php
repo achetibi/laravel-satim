@@ -4,241 +4,116 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Responses;
 
-use LaravelSatim\Contracts\SatimResponseInterface;
-use LaravelSatim\Enums\SatimCurrency;
-use LaravelSatim\Enums\SatimOrderStatus;
+use LaravelSatim\Enums\Currency;
+use LaravelSatim\Enums\OrderStatus;
 
-final readonly class SatimConfirmResponse implements SatimResponseInterface
+final readonly class SatimConfirmResponse extends SatimAbstractResponse
 {
-    /**
-     * @param  array<string, string|null>  $params
-     */
-    public function __construct(
-        public ?string $expiration = null,
-        public ?string $cardholderName = null,
-        public ?float $depositAmount = null,
-        public ?SatimCurrency $currency = null,
-        public ?string $pan = null,
-        public ?string $approvalCode = null,
-        public ?string $authorizationResponseId = null,
-        public ?string $orderNumber = null,
-        public ?float $amount = null,
-        public ?string $svfeResponse = null,
-        public ?string $ip = null,
-        public ?string $clientId = null,
-        public ?string $bindingId = null,
-        public ?string $paymentAccountReference = null,
-        public ?string $description = null,
-        public ?string $orderStatus = null,
-        public ?string $actionCode = null,
-        public ?string $actionCodeDescription = null,
-        public ?string $errorCode = null,
-        public ?string $errorMessage = null,
-        public array $params = [],
-    ) {
-    }
-
-    /**
-     * @param  array<array-key, mixed>|null  $response
-     */
-    public static function fromResponse(?array $response): self
-    {
-        $response ??= [];
-        $rawParams = $response['params'] ?? null;
-        $params = is_array($rawParams) ? $rawParams : [];
-
-        return new self(
-            expiration: self::str($response, 'expiration'),
-            cardholderName: self::str($response, 'cardholderName'),
-            depositAmount: self::amount($response, 'depositAmount'),
-            currency: self::currency($response),
-            pan: self::str($response, 'Pan'),
-            approvalCode: self::str($response, 'approvalCode'),
-            authorizationResponseId: self::str($response, 'authorizationResponseId'),
-            orderNumber: self::str($response, 'OrderNumber'),
-            amount: self::amount($response, 'Amount'),
-            svfeResponse: self::str($response, 'SvfeResponse'),
-            ip: self::str($response, 'Ip'),
-            clientId: self::str($response, 'clientId'),
-            bindingId: self::str($response, 'bindingId'),
-            paymentAccountReference: self::str($response, 'paymentAccountReference'),
-            description: self::str($response, 'Description'),
-            orderStatus: self::str($response, 'OrderStatus'),
-            actionCode: self::str($response, 'actionCode'),
-            actionCodeDescription: self::str($response, 'actionCodeDescription'),
-            errorCode: self::str($response, 'ErrorCode'),
-            errorMessage: self::str($response, 'ErrorMessage'),
-            params: [
-                'udf1' => self::str($params, 'udf1'),
-                'respCode' => self::str($params, 'respCode'),
-                'respCode_desc' => self::str($params, 'respCode_desc'),
-            ],
-        );
-    }
-
-    public function cardTemporarilyBlocked(): bool
-    {
-        return $this->respCode() === '37' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '203';
-    }
-
-    public function cardLost(): bool
-    {
-        return $this->respCode() === '41' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '208';
-    }
-
-    public function cardStolen(): bool
-    {
-        return $this->respCode() === '43' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '209';
-    }
-
-    public function cardInvalidExpiryDate(): bool
-    {
-        return $this->respCode() === 'AD' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '-1';
-    }
-
-    public function cardUnavailable(): bool
-    {
-        return $this->respCode() === '62' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '125';
-    }
-
-    public function cardLimitExceeded(): bool
-    {
-        return $this->respCode() === '61' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '121';
-    }
-
-    public function cardBalanceInsufficient(): bool
-    {
-        return $this->respCode() === '51' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '116';
-    }
-
-    public function cardInvalidCVV2(): bool
-    {
-        return $this->respCode() === 'AB' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '111';
-    }
-
-    public function cardExceededPasswordAttempts(): bool
-    {
-        return $this->respCode() === null && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '2003';
-    }
-
-    public function cardNotAuthorizedForOnlinePayment(): bool
-    {
-        return $this->respCode() === null && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '2003';
-    }
-
-    public function cardInactiveForOnlinePayment(): bool
-    {
-        return $this->respCode() === 'AE' && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '-1';
-    }
-
-    public function cardValid(): bool
-    {
-        return $this->respCode() === '00' && $this->errorCode === '0' && $this->orderStatus === '2' && $this->actionCode === '0';
-    }
-
-    public function cardExpired(): bool
-    {
-        return $this->respCode() === null && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '-2006';
-    }
-
-    public function cardExceededTransactionCeiling(): bool
-    {
-        return $this->respCode() === null && $this->errorCode === '3' && $this->orderStatus === '6' && $this->actionCode === '-2006';
-    }
-
-    public function status(): ?SatimOrderStatus
-    {
-        return $this->orderStatus === null ? null : SatimOrderStatus::tryFrom((int) $this->orderStatus);
-    }
-
-    public function registeredNotPaid(): bool
-    {
-        return $this->status() === SatimOrderStatus::REGISTERED_NOT_PAID;
-    }
-
-    public function approved(): bool
-    {
-        return $this->status() === SatimOrderStatus::APPROVED;
-    }
-
-    public function paid(): bool
-    {
-        return $this->status() === SatimOrderStatus::DEPOSITED;
-    }
-
-    public function reversed(): bool
-    {
-        return $this->status() === SatimOrderStatus::REVERSED;
-    }
-
-    public function refunded(): bool
-    {
-        return $this->status() === SatimOrderStatus::REFUNDED;
-    }
-
-    public function declined(): bool
-    {
-        return $this->status() === SatimOrderStatus::AUTHORIZATION_DECLINED
-            || $this->status() === SatimOrderStatus::DECLINED;
-    }
-
-    public function paymentAccepted(): bool
-    {
-        return $this->respCode() === '00' && $this->errorCode === '0' && $this->paid();
-    }
-
     public function successful(): bool
     {
-        return $this->paid() || $this->approved();
+        return $this->errorCode() === 0 && $this->orderStatus() === OrderStatus::DEPOSITED;
     }
 
-    public function fail(): bool
+    public function failureMessage(): ?string
     {
-        return $this->declined() || $this->reversed();
+        return $this->respCodeDesc() ?? $this->actionCodeDescription();
+    }
+
+    public function actionCode(): ?int
+    {
+        $value = $this->data['actionCode'] ?? null;
+
+        return is_int($value) ? $value : null;
+    }
+
+    public function actionCodeDescription(): ?string
+    {
+        $value = $this->data['actionCodeDescription'] ?? null;
+
+        return is_string($value) ? $value : null;
+    }
+
+    public function amount(): ?float
+    {
+        $value = $this->data['Amount'] ?? null;
+
+        return is_numeric($value) ? (float) ($value / 100) : null;
+    }
+
+    public function approvalCode(): ?string
+    {
+        $value = $this->data['approvalCode'] ?? null;
+
+        return is_string($value) ? $value : null;
+    }
+
+    public function authorizationResponseId(): ?string
+    {
+        $value = $this->data['authorizationResponseId'] ?? null;
+
+        return is_string($value) ? $value : null;
+    }
+
+    public function currency(): ?Currency
+    {
+        $value = $this->data['currency'] ?? null;
+
+        return is_string($value) ? Currency::fromCode($value) : null;
+    }
+
+    public function depositAmount(): ?float
+    {
+        $value = $this->data['depositAmount'] ?? null;
+
+        return is_numeric($value) ? (float) ($value/100) : null;
+    }
+
+    public function errorCode(): int
+    {
+        $value = $this->data['errorCode'] ?? $this->data['ErrorCode'] ?? null;
+
+        return is_int($value) ? $value : 0;
     }
 
     public function errorMessage(): ?string
     {
-        return ($this->params['respCode_desc'] ?? null) ?? ($this->actionCodeDescription ?: null);
+        $value = $this->data['errorMessage'] ?? $this->data['ErrorMessage'] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 
-    public function successMessage(): ?string
+    public function orderNumber(): ?string
     {
-        return ($this->params['respCode_desc'] ?? null) ?? ($this->actionCodeDescription ?: null);
+        $value = $this->data['OrderNumber'] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 
-    private function respCode(): ?string
+    public function orderStatus(): ?OrderStatus
     {
-        return $this->params['respCode'] ?? null;
+        $value = $this->data['OrderStatus'] ?? null;
+
+        return is_int($value) ? OrderStatus::tryFrom($value) : null;
     }
 
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private static function str(array $data, string $key): ?string
+    public function respCode(): ?string
     {
-        $value = $data[$key] ?? null;
+        $value = $this->data['params']['respCode'] ?? null;
 
-        return is_scalar($value) ? (string) $value : null;
+        return is_string($value) ? $value : null;
     }
 
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private static function amount(array $data, string $key): ?float
+    public function respCodeDesc(): ?string
     {
-        $value = $data[$key] ?? null;
+        $value = $this->data['params']['respCode_desc'] ?? null;
 
-        return is_numeric($value) ? (float) $value / 100 : null;
+        return is_string($value) ? $value : null;
     }
 
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private static function currency(array $data): ?SatimCurrency
+    public function svfeResponse(): ?string
     {
-        $value = self::str($data, 'currency');
+        $value = $this->data['SvfeResponse'] ?? null;
 
-        return $value === null ? null : SatimCurrency::tryFrom($value);
+        return is_string($value) ? $value : null;
     }
 }

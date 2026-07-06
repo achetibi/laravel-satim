@@ -4,29 +4,31 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Responses;
 
-use LaravelSatim\Contracts\SatimResponseInterface;
-
-final readonly class SatimRegisterResponse implements SatimResponseInterface
+final readonly class SatimRegisterResponse extends SatimAbstractResponse
 {
-    public function __construct(
-        public ?string $orderId = null,
-        public ?string $formUrl = null,
-    ) {
+    public function successful(): bool
+    {
+        return $this->errorCode() === 0 && ! empty($this->formUrl());
     }
 
-    /**
-     * @param  array<array-key, mixed>|null  $response
-     */
-    public static function fromResponse(?array $response): self
+    public function errorCode(): int
     {
-        $response ??= [];
+        $value = $this->data['errorCode'] ?? $this->data['ErrorCode'] ?? null;
 
-        $orderId = $response['orderId'] ?? null;
-        $formUrl = $response['formUrl'] ?? null;
+        return is_int($value) ? $value : 0;
+    }
 
-        return new self(
-            orderId: is_scalar($orderId) ? (string) $orderId : null,
-            formUrl: is_scalar($formUrl) ? (string) $formUrl : null,
-        );
+    public function errorMessage(): ?string
+    {
+        $value = $this->data['errorMessage'] ?? null;
+
+        return is_string($value) ? $value : null;
+    }
+
+    public function formUrl(): ?string
+    {
+        $value = $this->data['formUrl'] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 }

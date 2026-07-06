@@ -4,52 +4,42 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Requests;
 
-use LaravelSatim\Contracts\SatimRequestInterface;
-use LaravelSatim\Enums\SatimLanguage;
-use LaravelSatim\Exceptions\SatimValidationException;
-use LaravelSatim\Support\SatimValidator;
+use Illuminate\Validation\Rule;
+use LaravelSatim\Contracts\SatimResponseInterface;
+use LaravelSatim\Enums\Language;
+use LaravelSatim\Exceptions\SatimResponseException;
+use LaravelSatim\Http\Responses\SatimConfirmResponse;
+use Psr\Http\Message\ResponseInterface;
 
-final class SatimConfirmRequest implements SatimRequestInterface
+final readonly class SatimConfirmRequest extends SatimAbstractRequest
 {
-    /**
-     * @throws SatimValidationException
-     */
     public function __construct(
         public string $mdOrder,
-        public ?SatimLanguage $language = null,
+        public ?Language $language = null,
     ) {
-        $this->mdOrder = trim($this->mdOrder);
-
-        $this->validate();
     }
 
-    /**
-     * @throws SatimValidationException
-     */
-    public static function make(string $mdOrder, ?SatimLanguage $language = null): self
-    {
-        return new self(
-            mdOrder: $mdOrder,
-            language: $language,
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function parameters(): array
+    public function payload(): array
     {
         return [
             'mdOrder' => $this->mdOrder,
-            'language' => $this->language?->value,
+            'language' => Language::withFallback($this->language)->code(),
         ];
     }
 
-    public function validate(): void
+    public function rules(): array
     {
-        SatimValidator::make()
-            ->required($this->mdOrder, 'order id')
-            ->token($this->mdOrder, 'order id')
-            ->validate();
+        return [
+            'mdOrder' => ['required', 'string', 'size:20'],
+            'language' => ['nullable', Rule::enum(Language::class)],
+        ];
+    }
+
+    /**
+     * @throws SatimResponseException
+     */
+    public function toResponse(ResponseInterface $response): SatimResponseInterface
+    {
+        return SatimConfirmResponse::fromPsr($response);
     }
 }

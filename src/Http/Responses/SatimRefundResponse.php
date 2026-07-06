@@ -4,26 +4,24 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Responses;
 
-use LaravelSatim\Contracts\SatimResponseInterface;
-
-final readonly class SatimRefundResponse implements SatimResponseInterface
+final readonly class SatimRefundResponse extends SatimAbstractResponse
 {
-    public function __construct(
-        public ?string $errorMessage = null,
-    ) {
+    public function successful(): bool
+    {
+        return $this->errorCode() === 0;
     }
 
-    /**
-     * @param  array<array-key, mixed>|null  $response
-     */
-    public static function fromResponse(?array $response): self
+    public function errorCode(): ?int
     {
-        $response ??= [];
+        $value = $this->data['errorCode'] ?? $this->data['ErrorCode'] ?? null;
 
-        $errorMessage = $response['errorMessage'] ?? null;
+        return is_int($value) ? $value : null;
+    }
 
-        return new self(
-            errorMessage: is_scalar($errorMessage) ? (string) $errorMessage : null,
-        );
+    public function errorMessage(): ?string
+    {
+        $value = $this->data['errorMessage'] ?? $this->data['ErrorMessage'] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 }

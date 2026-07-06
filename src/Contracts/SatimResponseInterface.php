@@ -6,8 +6,7 @@ namespace LaravelSatim\Contracts;
 
 interface SatimResponseInterface
 {
-    /**
-     * @param  array<array-key, mixed>|null  $response
-     */
-    public static function fromResponse(?array $response): self;
+    public function successful(): bool;
+
+    public function raw(): array;
 }

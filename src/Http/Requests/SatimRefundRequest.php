@@ -4,39 +4,20 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Requests;
 
-use LaravelSatim\Contracts\SatimRequestInterface;
-use LaravelSatim\Exceptions\SatimValidationException;
-use LaravelSatim\Support\SatimValidator;
+use LaravelSatim\Contracts\SatimResponseInterface;
+use LaravelSatim\Exceptions\SatimResponseException;
+use LaravelSatim\Http\Responses\SatimRefundResponse;
+use Psr\Http\Message\ResponseInterface;
 
-final class SatimRefundRequest implements SatimRequestInterface
+final readonly class SatimRefundRequest extends SatimAbstractRequest
 {
-    /**
-     * @throws SatimValidationException
-     */
     public function __construct(
         public string $orderId,
         public float $amount,
     ) {
-        $this->orderId = trim($this->orderId);
-
-        $this->validate();
     }
 
-    /**
-     * @throws SatimValidationException
-     */
-    public static function make(string $orderId, float $amount): self
-    {
-        return new self(
-            orderId: $orderId,
-            amount: $amount,
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function parameters(): array
+    public function payload(): array
     {
         return [
             'orderId' => $this->orderId,
@@ -44,12 +25,19 @@ final class SatimRefundRequest implements SatimRequestInterface
         ];
     }
 
-    public function validate(): void
+    public function rules(): array
     {
-        SatimValidator::make()
-            ->required($this->orderId, 'order id')
-            ->token($this->orderId, 'order id')
-            ->amount($this->amount)
-            ->validate();
+        return [
+            'orderId' => ['required', 'string', 'alpha_num', 'max:30'],
+            'amount' => ['required', 'numeric', 'decimal:0,2', 'min:50', 'max:9999999999.99'],
+        ];
+    }
+
+    /**
+     * @throws SatimResponseException
+     */
+    public function toResponse(ResponseInterface $response): SatimResponseInterface
+    {
+        return SatimRefundResponse::fromPsr($response);
     }
 }

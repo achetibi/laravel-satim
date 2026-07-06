@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Contracts;
 
-use LaravelSatim\Exceptions\SatimValidationException;
+use LaravelSatim\Enums\HttpMethod;
+use Psr\Http\Message\ResponseInterface;
 
 interface SatimRequestInterface
 {
-    /**
-     * Business parameters sent to the SATIM gateway (no credentials).
-     *
-     * @return array<string, mixed>
-     */
-    public function parameters(): array;
+    public function payload(): array;
 
-    /**
-     * @throws SatimValidationException
-     */
-    public function validate(): void;
+    public function rules(): array;
+
+    public function method(): HttpMethod;
+
+    public function toResponse(ResponseInterface $response): SatimResponseInterface;
 }
