@@ -28,6 +28,9 @@ jobs:
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }}
 
+    env:
+      COMPOSER_NO_SECURITY_BLOCKING: '1'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
