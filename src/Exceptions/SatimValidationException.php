@@ -37,11 +37,17 @@ final class SatimValidationException extends SatimAbstractException
     }
 
     /**
-     * @return array<string, array<string>>
+     * @return array<string, array<int, string>>
      */
     public function messages(): array
     {
-        return $this->errors->getMessages();
+        $messages = [];
+
+        foreach ($this->errors->getMessages() as $field => $fieldMessages) {
+            $messages[(string) $field] = array_values(array_filter((array) $fieldMessages, 'is_string'));
+        }
+
+        return $messages;
     }
 
     public function first(?string $field = null): ?string
@@ -57,7 +63,7 @@ final class SatimValidationException extends SatimAbstractException
     }
 
     /**
-     * @return array<string, array<string>>
+     * @return array<string, array<int, string>>
      */
     public function toArray(): array
     {
