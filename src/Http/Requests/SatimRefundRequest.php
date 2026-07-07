@@ -17,6 +17,9 @@ final readonly class SatimRefundRequest extends SatimAbstractRequest
     ) {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function payload(): array
     {
         return [
@@ -25,6 +28,9 @@ final readonly class SatimRefundRequest extends SatimAbstractRequest
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

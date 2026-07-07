@@ -5,20 +5,26 @@ declare(strict_types=1);
 namespace LaravelSatim\Http\Requests;
 
 use LaravelSatim\Contracts\SatimRequestInterface;
-use LaravelSatim\Enums\HttpMethod;
 
 abstract readonly class SatimAbstractRequest implements SatimRequestInterface
 {
-    public function method(): HttpMethod
-    {
-        return HttpMethod::POST;
-    }
-
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [];
     }
 
+    /**
+     * Recursively remove null values (and the empty arrays they leave behind)
+     * so optional fields are never sent to the gateway.
+     *
+     * @template TKey of array-key
+     *
+     * @param  array<TKey, mixed>  $payload
+     * @return array<TKey, mixed>
+     */
     protected function clean(array $payload): array
     {
         $cleaned = [];

@@ -31,6 +31,9 @@ final readonly class SatimRegisterRequest extends SatimAbstractRequest
     ) {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function payload(): array
     {
         return $this->clean([
@@ -52,6 +55,9 @@ final readonly class SatimRegisterRequest extends SatimAbstractRequest
         ]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

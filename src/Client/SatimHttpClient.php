@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Client;
 
+use Illuminate\Support\Facades\Log;
 use JsonException;
 use LaravelSatim\Contracts\SatimHttpClientInterface;
 use LaravelSatim\Contracts\SatimRequestInterface;
@@ -35,29 +36,41 @@ final readonly class SatimHttpClient implements SatimHttpClientInterface
      */
     public function send(string $endpoint, SatimRequestInterface $request): ResponseInterface
     {
-        $uri = rtrim($this->config->baseUrl(), '/') . '/' . ltrim($endpoint, '/');
+        $method = $this->config->httpMethod();
+        $uri = $this->config->baseUrl() . '/' . ltrim($endpoint, '/');
         $payload = $this->preparePayload($request);
 
-        if ($request->method() === HttpMethod::GET) {
-            $uri .= '?'.http_build_query($payload);
+        if ($method === HttpMethod::GET) {
+            $uri .= '?' . http_build_query($payload);
         }
 
-        $psr = $this->requestFactory->createRequest($request->method()->value, $uri)
+        $psr = $this->requestFactory->createRequest($method->value, $uri)
             ->withHeader('Accept', 'application/json');
 
-        if ($request->method() === HttpMethod::POST) {
+        if ($method === HttpMethod::POST) {
             $psr = $psr->withHeader('Content-Type', 'application/x-www-form-urlencoded')
                 ->withBody($this->streamFactory->createStream(http_build_query($payload)));
         }
 
+        $this->log('SATIM request', ['endpoint' => $endpoint, 'method' => $method->value]);
+
         try {
-            return $this->client->sendRequest($psr);
+            $response = $this->client->sendRequest($psr);
         } catch (ClientExceptionInterface $e) {
+            $this->log('SATIM connection failed', ['endpoint' => $endpoint, 'reason' => $e->getMessage()]);
+
             throw SatimConnectionException::from($e);
         }
+
+        $this->log('SATIM response', ['endpoint' => $endpoint, 'status' => $response->getStatusCode()]);
+
+        return $response;
     }
 
     /**
+     * @return array<string, mixed>
+     *
+     * @throws SatimConfigurationException
      * @throws SatimEncodingException
      */
     private function preparePayload(SatimRequestInterface $request): array
@@ -65,7 +78,9 @@ final readonly class SatimHttpClient implements SatimHttpClientInterface
         $payload = array_merge($this->config->credentials(), $request->payload());
 
         if (isset($payload['jsonParams']) && is_array($payload['jsonParams'])) {
-            $payload['jsonParams']['force_terminal_id'] = $this->config->terminalId();
+            if ($this->config->terminalId() !== null) {
+                $payload['jsonParams']['force_terminal_id'] = $this->config->terminalId();
+            }
 
             try {
                 $payload['jsonParams'] = json_encode($payload['jsonParams'], JSON_THROW_ON_ERROR);
@@ -75,5 +90,20 @@ final readonly class SatimHttpClient implements SatimHttpClientInterface
         }
 
         return $payload;
+    }
+
+    /**
+     * Log a gateway interaction when logging is enabled. Sensitive payload data
+     * (credentials, card details) is intentionally never logged.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    private function log(string $message, array $context): void
+    {
+        if (! $this->config->loggingEnabled()) {
+            return;
+        }
+
+        Log::channel($this->config->logChannel())->debug($message, $context);
     }
 }

@@ -8,5 +8,8 @@ interface SatimResponseInterface
 {
     public function successful(): bool;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function raw(): array;
 }

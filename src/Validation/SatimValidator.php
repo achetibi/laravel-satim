@@ -8,12 +8,16 @@ use Illuminate\Contracts\Validation\Factory as ValidatorFactory;
 use LaravelSatim\Contracts\SatimRequestInterface;
 use LaravelSatim\Contracts\SatimValidatorInterface;
 use LaravelSatim\Exceptions\SatimValidationException;
+use LaravelSatim\Support\SatimTranslator;
 use ReflectionObject;
 use ReflectionProperty;
 
 final class SatimValidator implements SatimValidatorInterface
 {
+    /** @var array<array-key, mixed> */
     private array $merged = [];
+
+    /** @var list<string> */
     private array $excluded = [];
 
     public function __construct(
@@ -21,6 +25,9 @@ final class SatimValidator implements SatimValidatorInterface
     ) {
     }
 
+    /**
+     * @param  array<string, mixed>  $rules
+     */
     public function merge(array $rules): self
     {
         $this->merged = array_merge_recursive($this->merged, $rules);
@@ -30,7 +37,7 @@ final class SatimValidator implements SatimValidatorInterface
 
     public function exclude(string ...$fields): self
     {
-        $this->excluded = array_merge($this->excluded, $fields);
+        $this->excluded = array_values(array_merge($this->excluded, $fields));
 
         return $this;
     }
@@ -46,7 +53,7 @@ final class SatimValidator implements SatimValidatorInterface
         $validator = $this->factory->make(
             data: $this->data($request),
             rules: $rules,
-            messages: trans('satim::validation'),
+            messages: SatimTranslator::group('satim::validation'),
         );
 
         if ($validator->fails()) {
@@ -54,6 +61,9 @@ final class SatimValidator implements SatimValidatorInterface
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function data(SatimRequestInterface $request): array
     {
         $data = [];

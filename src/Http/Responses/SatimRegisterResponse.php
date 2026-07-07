@@ -8,27 +8,26 @@ final readonly class SatimRegisterResponse extends SatimAbstractResponse
 {
     public function successful(): bool
     {
-        return $this->errorCode() === 0 && ! empty($this->formUrl());
+        return $this->errorCode() === 0 && ($this->formUrl() ?? '') !== '';
     }
 
     public function errorCode(): int
     {
-        $value = $this->data['errorCode'] ?? $this->data['ErrorCode'] ?? null;
-
-        return is_int($value) ? $value : 0;
+        return $this->integer('errorCode', 'ErrorCode') ?? 0;
     }
 
     public function errorMessage(): ?string
     {
-        $value = $this->data['errorMessage'] ?? null;
+        return $this->string('errorMessage', 'ErrorMessage');
+    }
 
-        return is_string($value) ? $value : null;
+    public function orderId(): ?string
+    {
+        return $this->string('orderId');
     }
 
     public function formUrl(): ?string
     {
-        $value = $this->data['formUrl'] ?? null;
-
-        return is_string($value) ? $value : null;
+        return $this->string('formUrl');
     }
 }

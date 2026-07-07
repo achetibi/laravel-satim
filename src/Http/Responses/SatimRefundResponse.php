@@ -13,15 +13,11 @@ final readonly class SatimRefundResponse extends SatimAbstractResponse
 
     public function errorCode(): ?int
     {
-        $value = $this->data['errorCode'] ?? $this->data['ErrorCode'] ?? null;
-
-        return is_int($value) ? $value : null;
+        return $this->integer('errorCode', 'ErrorCode');
     }
 
     public function errorMessage(): ?string
     {
-        $value = $this->data['errorMessage'] ?? $this->data['ErrorMessage'] ?? null;
-
-        return is_string($value) ? $value : null;
+        return $this->string('errorMessage', 'ErrorMessage');
     }
 }

@@ -9,27 +9,57 @@ on:
       - main
 
 jobs:
-  build:
-
+  tests:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+        laravel: ['11', '12', '13']
+        stability: ['prefer-lowest', 'prefer-stable']
+        include:
+          - laravel: '11'
+            testbench: '9'
+          - laravel: '12'
+            testbench: '10'
+          - laravel: '13'
+            testbench: '11'
+
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }}
+
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Validate composer.json
-      run: composer validate --no-check-lock
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json, curl, dom, libxml
+          coverage: none
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-lock
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Constrain dependencies to the matrix versions
+        run: >
+          composer require --no-update --no-interaction
+          "illuminate/support:^${{ matrix.laravel }}.0"
+          "illuminate/http:^${{ matrix.laravel }}.0"
+          "illuminate/validation:^${{ matrix.laravel }}.0"
+          "orchestra/testbench:^${{ matrix.testbench }}.0"
 
-    - name: Run test suite
-      run: composer run-script test
+      - name: Install dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: ${{ matrix.stability }}
+
+      - name: Lint (Pint, PSR-12)
+        run: composer test:lint
+
+      - name: Static analysis (PHPStan level 10)
+        run: composer test:types
+
+      - name: Run tests (Pest)
+        run: composer test:inline

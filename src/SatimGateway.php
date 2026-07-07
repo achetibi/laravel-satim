@@ -21,7 +21,8 @@ final readonly class SatimGateway implements SatimGatewayInterface
     public function __construct(
         private SatimHttpClientInterface $client,
         private SatimValidatorInterface $validator,
-    ) {}
+    ) {
+    }
 
     public function register(SatimRegisterRequest $request): SatimRegisterResponse
     {

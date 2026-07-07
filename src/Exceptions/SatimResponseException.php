@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Exceptions;
 
+use LaravelSatim\Support\SatimTranslator;
+
 final class SatimResponseException extends SatimAbstractException
 {
     public function __construct(
@@ -17,27 +19,28 @@ final class SatimResponseException extends SatimAbstractException
     public static function fromCode(string $errorCode, ?string $errorMessage = null): self
     {
         $key = "satim::exceptions.gateway.{$errorCode}";
-        $message = trans()->has($key)
-            ? __($key)
-            : $errorMessage ?? __('satim::exceptions.gateway.unknown');
+
+        $message = SatimTranslator::has($key)
+            ? SatimTranslator::get($key)
+            : $errorMessage ?? SatimTranslator::get('satim::exceptions.gateway.unknown');
 
         return new self(
             message: $message,
             errorCode: $errorCode,
-            errorMessage: $errorMessage
+            errorMessage: $errorMessage ?? 'unknown',
         );
     }
 
     public static function httpError(int $status, string $reason): self
     {
         return new self(
-            message: __('satim::exceptions.http_error', ['status' => $status, 'reason' => $reason]),
+            message: SatimTranslator::get('satim::exceptions.http_error', ['status' => $status, 'reason' => $reason]),
             errorCode: (string) $status,
         );
     }
 
     public static function malformed(): self
     {
-        return new self(__('satim::exceptions.malformed_response'));
+        return new self(SatimTranslator::get('satim::exceptions.malformed_response'));
     }
 }
