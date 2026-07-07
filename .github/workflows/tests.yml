@@ -69,9 +69,11 @@ jobs:
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Lint (Pint, PSR-12)
+        if: matrix.stability == 'prefer-stable'
         run: composer test:lint
 
       - name: Static analysis (PHPStan level 10)
+        if: matrix.stability == 'prefer-stable'
         run: composer test:types
 
       - name: Run tests (Pest)
