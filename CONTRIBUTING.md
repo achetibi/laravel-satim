@@ -43,7 +43,7 @@ Run tests with:
 
 ## 📁 Code Style
 
-This package uses **Laravel Pint** with the `laravel` preset.
+This package uses **Laravel Pint** with the `psr12` preset.
 
 Format your code before submitting:
 

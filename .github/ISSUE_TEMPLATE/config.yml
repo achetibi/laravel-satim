@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: mailto:chetibi.abderrahim@gmail.com
+    about: Please report security issues privately by email, not through public issues.
+  - name: 📖 Documentation
+    url: https://github.com/achetibi/laravel-satim#readme
+    about: Check the README for configuration and usage before opening an issue.

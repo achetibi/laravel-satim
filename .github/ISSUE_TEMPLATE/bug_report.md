@@ -1,38 +1,60 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+about: Report a problem with the laravel-satim package
+title: '[Bug]: '
+labels: bug
 assignees: ''
 
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is and which gateway operation is affected
+(register / confirm / refund).
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**To reproduce**
+Provide a minimal code sample that triggers the problem:
+
+```php
+use LaravelSatim\Facades\Satim;
+use LaravelSatim\Http\Requests\SatimRegisterRequest;
+
+$response = Satim::register(new SatimRegisterRequest(
+    orderNumber: 'ORD123456',
+    amount: 1500.00,
+    returnUrl: 'https://example.test/return',
+    udf1: 'ORD123456',
+));
+```
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Actual behavior**
+What actually happened. Include the exception class and message, or the raw gateway response
+(`$response->raw()`) if relevant.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Exception / stack trace**
+<!-- Paste the full exception message and stack trace here, if any. Redact any credentials. -->
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+```
+```
+
+**Environment**
+- Package version: <!-- e.g. 2.0.0 -->
+- PHP version: <!-- e.g. 8.3 -->
+- Laravel version: <!-- e.g. 11.x -->
+- SATIM environment: <!-- test / staging / prod -->
+- HTTP method (`satim.http.method`): <!-- POST (default) / GET -->
+
+**Configuration (redacted)**
+<!-- Relevant, non-secret parts of your config/satim.php. NEVER paste your username, password or terminal id. -->
+
+```php
+```
 
 **Additional context**
 Add any other context about the problem here.
+
+> ⚠️ Do not include real credentials, card data, or full gateway responses containing sensitive
+> information. For security vulnerabilities, please email chetibi.abderrahim@gmail.com instead of
+> opening a public issue.
