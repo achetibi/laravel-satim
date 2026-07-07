@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-satim` will be documented in this file
 
-## 2.0.0 - 2026-07-07
+## 2.0.1 - 2026-07-07
 
 Full rewrite around pure request DTOs, immutable typed responses and a real exception hierarchy.
 This is a **breaking** release; see the migration notes below.
