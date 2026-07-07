@@ -6,9 +6,12 @@
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg?style=flat-square)](phpstan.neon)
 [![License](https://img.shields.io/github/license/achetibi/laravel-satim)](LICENSE.md)
 
-**Laravel Satim** is a clean, strongly-typed Laravel package that integrates the **SATIM / CIB** online payment gateway.
+**Laravel Satim** is a clean, strongly-typed Laravel package for **SATIM online payments in Algeria** — the
+interbank e-payment gateway behind **CIB** and **Edahabia** card payments (paiement en ligne / الدفع الإلكتروني).
 It covers the full transaction lifecycle — registration, confirmation and refund — behind pure request DTOs, immutable
 response objects and a real exception hierarchy.
+
+> Keywords: SATIM Laravel, CIB Laravel, e-paiement Algérie, Algerian payment gateway, carte CIB / Edahabia, DZ.
 
 ---
 
