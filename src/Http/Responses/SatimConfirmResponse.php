@@ -31,7 +31,7 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
 
     public function amount(): ?float
     {
-        return $this->money('Amount');
+        return $this->money('amount', 'Amount');
     }
 
     public function approvalCode(): ?string
@@ -68,12 +68,12 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
 
     public function orderNumber(): ?string
     {
-        return $this->string('OrderNumber');
+        return $this->string('orderNumber', 'OrderNumber');
     }
 
     public function orderStatus(): ?OrderStatus
     {
-        $value = $this->integer('OrderStatus');
+        $value = $this->integer('orderStatus', 'OrderStatus');
 
         return $value !== null ? OrderStatus::tryFrom($value) : null;
     }
