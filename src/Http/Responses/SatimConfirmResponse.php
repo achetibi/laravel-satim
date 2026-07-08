@@ -19,29 +19,14 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
         return $this->respCodeDesc() ?? $this->actionCodeDescription();
     }
 
-    public function actionCode(): ?int
+    public function expiration(): ?string
     {
-        return $this->integer('actionCode');
+        return $this->string('expiration');
     }
 
-    public function actionCodeDescription(): ?string
+    public function depositAmount(): ?float
     {
-        return $this->string('actionCodeDescription');
-    }
-
-    public function amount(): ?float
-    {
-        return $this->money('amount', 'Amount');
-    }
-
-    public function approvalCode(): ?string
-    {
-        return $this->string('approvalCode');
-    }
-
-    public function authorizationResponseId(): ?string
-    {
-        return $this->string('authorizationResponseId');
+        return $this->money('depositAmount');
     }
 
     public function currency(): ?Currency
@@ -51,9 +36,24 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
         return $code !== null ? Currency::fromCode($code) : null;
     }
 
-    public function depositAmount(): ?float
+    public function authorizationResponseId(): ?string
     {
-        return $this->money('depositAmount');
+        return $this->string('authorizationResponseId');
+    }
+
+    public function approvalCode(): ?string
+    {
+        return $this->string('approvalCode');
+    }
+
+    public function actionCode(): ?int
+    {
+        return $this->integer('actionCode');
+    }
+
+    public function actionCodeDescription(): ?string
+    {
+        return $this->string('actionCodeDescription');
     }
 
     public function errorCode(): int
@@ -66,16 +66,36 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
         return $this->string('errorMessage', 'ErrorMessage');
     }
 
-    public function orderNumber(): ?string
-    {
-        return $this->string('orderNumber', 'OrderNumber');
-    }
-
     public function orderStatus(): ?OrderStatus
     {
         $value = $this->integer('orderStatus', 'OrderStatus');
 
         return $value !== null ? OrderStatus::tryFrom($value) : null;
+    }
+
+    public function orderNumber(): ?string
+    {
+        return $this->string('orderNumber', 'OrderNumber');
+    }
+
+    public function pan(): ?string
+    {
+        return $this->string('pan', 'Pan');
+    }
+
+    public function amount(): ?float
+    {
+        return $this->money('amount', 'Amount');
+    }
+
+    public function ip(): ?string
+    {
+        return $this->string('ip', 'Ip');
+    }
+
+    public function description(): ?string
+    {
+        return $this->string('description', 'Description');
     }
 
     public function respCode(): ?string
