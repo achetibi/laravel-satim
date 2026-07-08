@@ -69,7 +69,7 @@ final readonly class SatimConfig
      * HTTP method used for every gateway call.
      *
      * SATIM strongly recommends POST so credentials travel in the request body
-     * instead of being exposed in the URL, query string, proxy logs or history.
+     * instead of being exposed in the URL, query string, proxy logs, or history.
      *
      * @throws SatimConfigurationException
      */
