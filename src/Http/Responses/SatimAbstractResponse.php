@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace LaravelSatim\Http\Responses;
 
+use DateTimeImmutable;
 use LaravelSatim\Contracts\SatimResponseInterface;
 use LaravelSatim\Exceptions\SatimResponseException;
+use LaravelSatim\Support\SatimCaster;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -50,9 +52,6 @@ abstract readonly class SatimAbstractResponse implements SatimResponseInterface
         return (new static($decoded))->throwIfFailed();
     }
 
-    /**
-     * Return the first non-null value among the provided keys (dot notation supported).
-     */
     protected function value(string ...$keys): mixed
     {
         foreach ($keys as $key) {
@@ -68,26 +67,56 @@ abstract readonly class SatimAbstractResponse implements SatimResponseInterface
 
     protected function string(string ...$keys): ?string
     {
-        $value = $this->value(...$keys);
-
-        return is_string($value) ? $value : null;
+        return SatimCaster::string($this->value(...$keys));
     }
 
     protected function integer(string ...$keys): ?int
     {
-        $value = $this->value(...$keys);
+        return SatimCaster::integer($this->value(...$keys));
+    }
 
-        return is_numeric($value) ? (int) $value : null;
+    protected function money(string ...$keys): ?float
+    {
+        $value = SatimCaster::float($this->value(...$keys));
+
+        return $value !== null ? $value / 100 : null;
+    }
+
+    protected function dateTime(string ...$keys): ?DateTimeImmutable
+    {
+        return SatimCaster::dateTime($this->value(...$keys));
     }
 
     /**
-     * Read a monetary field expressed in centimes and return it in major units.
+     * @return array<array-key, mixed>
      */
-    protected function money(string ...$keys): ?float
+    protected function nested(string ...$keys): array
     {
         $value = $this->value(...$keys);
 
-        return is_numeric($value) ? (float) $value / 100 : null;
+        return is_array($value) ? $value : [];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function pairs(string ...$keys): array
+    {
+        $items = $this->value(...$keys);
+
+        if (! is_array($items)) {
+            return [];
+        }
+
+        $pairs = [];
+
+        foreach ($items as $item) {
+            if (is_array($item) && isset($item['name'], $item['value']) && is_scalar($item['name']) && is_scalar($item['value'])) {
+                $pairs[(string) $item['name']] = (string) $item['value'];
+            }
+        }
+
+        return $pairs;
     }
 
     /**
@@ -104,7 +133,7 @@ abstract readonly class SatimAbstractResponse implements SatimResponseInterface
         $errorMessage = $this->string('errorMessage', 'ErrorMessage');
 
         if ($this instanceof SatimConfirmResponse) {
-            $errorCode = $this->respCode() ?? $errorCode;
+            $errorCode = $this->params()->respCode ?? $errorCode;
             $errorMessage = $this->message() ?? $errorMessage;
         }
 
