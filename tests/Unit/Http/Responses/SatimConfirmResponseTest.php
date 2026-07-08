@@ -29,13 +29,20 @@ it('resolves the currency from its numeric code', function (): void {
         ->and((new SatimConfirmResponse([]))->currency())->toBeNull();
 });
 
-it('reads nested response params', function (): void {
+it('exposes the confirmation params as a typed value object', function (): void {
     $response = new SatimConfirmResponse([
-        'params' => ['respCode' => '00', 'respCode_desc' => 'Approved'],
+        'params' => [
+            'respCode' => '00',
+            'respCode_desc' => 'Approved',
+            'udf1' => 'RES202600008',
+        ],
     ]);
 
-    expect($response->respCode())->toBe('00')
-        ->and($response->respCodeDesc())->toBe('Approved');
+    $params = $response->params();
+
+    expect($params->respCode)->toBe('00')
+        ->and($params->respCodeDesc)->toBe('Approved')
+        ->and($params->udf1)->toBe('RES202600008');
 });
 
 it('builds a failure message from the response params or action code', function (): void {

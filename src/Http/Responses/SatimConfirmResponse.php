@@ -6,6 +6,7 @@ namespace LaravelSatim\Http\Responses;
 
 use LaravelSatim\Enums\Currency;
 use LaravelSatim\Enums\OrderStatus;
+use LaravelSatim\ValueObjects\ConfirmResponse\Params;
 
 final readonly class SatimConfirmResponse extends SatimAbstractResponse
 {
@@ -16,7 +17,7 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
 
     public function message(): ?string
     {
-        return $this->respCodeDesc() ?? $this->actionCodeDescription();
+        return $this->params()->respCodeDesc ?? $this->actionCodeDescription();
     }
 
     public function expiration(): ?string
@@ -98,14 +99,9 @@ final readonly class SatimConfirmResponse extends SatimAbstractResponse
         return $this->string('description', 'Description');
     }
 
-    public function respCode(): ?string
+    public function params(): Params
     {
-        return $this->string('params.respCode');
-    }
-
-    public function respCodeDesc(): ?string
-    {
-        return $this->string('params.respCode_desc');
+        return Params::fromArray($this->nested('params'));
     }
 
     public function svfeResponse(): ?string
