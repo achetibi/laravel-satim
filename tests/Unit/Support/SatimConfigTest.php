@@ -9,7 +9,7 @@ use LaravelSatim\Enums\Language;
 use LaravelSatim\Exceptions\SatimConfigurationException;
 
 it('resolves the environment', function (): void {
-    expect(satimConfig()->environment())->toBe(Environment::TEST);
+    expect(satimConfig()->environment())->toBe(Environment::TESTING);
 });
 
 it('throws on an invalid environment', function (): void {
@@ -21,7 +21,7 @@ it('trims the trailing slash from the base url', function (): void {
 });
 
 it('throws when the base url is missing', function (): void {
-    satimConfig(['base_urls' => ['test' => null]])->baseUrl();
+    satimConfig(['base_urls' => ['testing' => null]])->baseUrl();
 })->throws(SatimConfigurationException::class);
 
 it('returns the gateway credentials', function (): void {

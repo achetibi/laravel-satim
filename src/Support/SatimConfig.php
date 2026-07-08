@@ -25,7 +25,7 @@ final readonly class SatimConfig
      */
     public function environment(): Environment
     {
-        $value = $this->getString('environment', Environment::TEST->value);
+        $value = $this->getString('environment', Environment::TESTING->value);
 
         return Environment::tryFrom($value) ?? throw SatimConfigurationException::invalidEnvironment($value);
     }

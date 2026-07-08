@@ -16,11 +16,11 @@ return [
     |
     | The SATIM environment the package talks to. It selects which entry of the
     | "base_urls" array below is used. Supported values are backed by the
-    | Environment enum: "test", "staging" and "prod".
+    | Environment enum: "testing", "staging" and "production".
     |
     */
 
-    'environment' => env('SATIM_ENV', Environment::TEST->value),
+    'environment' => env('SATIM_ENV', Environment::TESTING->value),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,9 +52,9 @@ return [
     */
 
     'base_urls' => [
-        Environment::TEST->value => env('SATIM_URL_TEST', 'https://test2.satim.dz/payment/rest'),
+        Environment::TESTING->value => env('SATIM_URL_TESTING', 'https://test2.satim.dz/payment/rest'),
         Environment::STAGING->value => env('SATIM_URL_STAGING', 'https://test.satim.dz/payment/rest'),
-        Environment::PRODUCTION->value => env('SATIM_URL_PROD', 'https://cib.satim.dz/payment/rest'),
+        Environment::PRODUCTION->value => env('SATIM_URL_PRODUCTION', 'https://cib.satim.dz/payment/rest'),
     ],
 
     /*

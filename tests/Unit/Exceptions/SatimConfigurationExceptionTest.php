@@ -20,8 +20,8 @@ it('builds an invalid-environment exception', function (): void {
 });
 
 it('builds a missing-base-url exception', function (): void {
-    expect(SatimConfigurationException::missingBaseUrl('prod')->getMessage())
-        ->toContain('prod');
+    expect(SatimConfigurationException::missingBaseUrl('production')->getMessage())
+        ->toContain('production');
 });
 
 it('builds an invalid-value exception', function (): void {

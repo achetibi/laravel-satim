@@ -43,7 +43,7 @@ What actually happened. Include the exception class and message, or the raw gate
 - Package version: <!-- e.g. 2.0.0 -->
 - PHP version: <!-- e.g. 8.3 -->
 - Laravel version: <!-- e.g. 11.x -->
-- SATIM environment: <!-- test / staging / prod -->
+- SATIM environment: <!-- testing / staging / production -->
 - HTTP method (`satim.http.method`): <!-- POST (default) / GET -->
 
 **Configuration (redacted)**

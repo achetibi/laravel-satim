@@ -6,7 +6,7 @@ namespace LaravelSatim\Enums;
 
 enum Environment: string
 {
-    case TEST = 'test';
+    case TESTING = 'testing';
     case STAGING = 'staging';
-    case PRODUCTION = 'prod';
+    case PRODUCTION = 'production';
 }

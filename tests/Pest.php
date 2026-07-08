@@ -17,14 +17,14 @@ uses(TestCase::class)->in('Unit');
 function satimConfig(array $overrides = []): SatimConfig
 {
     return new SatimConfig(array_replace_recursive([
-        'environment' => 'test',
+        'environment' => 'testing',
         'credentials' => [
             'username' => 'user',
             'password' => 'pass',
             'terminal_id' => 'terminal',
         ],
         'base_urls' => [
-            'test' => 'https://test2.satim.dz/payment/rest/',
+            'testing' => 'https://test2.satim.dz/payment/rest/',
         ],
         'http' => [
             'method' => 'POST',
