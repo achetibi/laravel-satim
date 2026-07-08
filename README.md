@@ -8,8 +8,8 @@
 
 **Laravel Satim** is a clean, strongly-typed Laravel package for **SATIM online payments in Algeria** — the
 interbank e-payment gateway behind **CIB** and **Edahabia** card payments (paiement en ligne / الدفع الإلكتروني).
-It covers the full transaction lifecycle — registration, confirmation and refund — behind pure request DTOs, immutable
-response objects and a real exception hierarchy.
+It covers the full transaction lifecycle — registration, confirmation, status and refund — behind pure request DTOs,
+immutable response objects, typed value objects and a real exception hierarchy.
 
 > Keywords: SATIM Laravel, CIB Laravel, e-paiement Algérie, Algerian payment gateway, carte CIB / Edahabia, DZ.
 
@@ -18,8 +18,9 @@ response objects and a real exception hierarchy.
 ## 🚀 Features
 
 - Simple configuration via `.env`
-- Register / Confirm / Refund operations
+- Register / Confirm / **Status** / Refund operations
 - **Immutable, typed responses** — each response owns its own data
+- **Typed value objects** for nested response structures (card auth info, merchant params…)
 - **Real exception hierarchy** driven by the official SATIM error codes
 - **Config-driven HTTP method** — POST by default, as recommended by SATIM
 - Automatic retries for transport failures and 5xx responses
@@ -154,8 +155,9 @@ if ($response->successful()) {
 ```
 
 `SatimConfirmResponse` exposes rich accessors: `successful()`, `orderStatus()` (a `LaravelSatim\Enums\OrderStatus`
-enum), `message()`, `amount()`, `depositAmount()`, `currency()`, `approvalCode()`, `respCode()`,
-`respCodeDesc()`, `errorCode()`, `errorMessage()` and `raw()`.
+enum), `message()`, `amount()`, `depositAmount()`, `currency()`, `approvalCode()`, `authorizationResponseId()`,
+`pan()`, `errorCode()`, `errorMessage()`, `raw()`, plus `params()` — a typed
+`LaravelSatim\ValueObjects\ConfirmResponse\Params` value object (`respCode`, `respCodeDesc`, `udf1`–`udf5`, `extra`).
 
 ### 3. Refund a transaction
 
@@ -169,12 +171,49 @@ $response = app(SatimGatewayInterface::class)->refund(new SatimRefundRequest(
 ));
 ```
 
+### 4. Check a transaction status
+
+Fetch the full, **extended** status of an order at any time (reconciliation, webhooks, retries…) using its gateway
+`orderId` (the value returned by `register()` as `$response->orderId()`):
+
+```php
+use LaravelSatim\Contracts\SatimGatewayInterface;
+use LaravelSatim\Http\Requests\SatimStatusRequest;
+
+$response = app(SatimGatewayInterface::class)->status(new SatimStatusRequest(
+    orderId: 'ehf9z2yvvThwQ4AACW2G',
+));
+
+if ($response->successful()) {
+    // Payment captured (OrderStatus::DEPOSITED).
+}
+```
+
+`SatimStatusResponse` exposes `successful()`, `orderStatus()`, `message()`, `amount()`, `currency()`, `date()` and
+`authDateTime()` (both `?DateTimeImmutable`), `ip()`, `fraudLevel()`, `terminalId()`, `authRefNum()`, `orderNumber()`,
+`orderDescription()`, `errorCode()`, `errorMessage()`, `raw()`, plus three **typed value objects**:
+
+```php
+$response->merchantOrderParams()->disablePhone;      // ?bool
+$response->merchantOrderParams()->transmissionDate;  // ?DateTimeImmutable
+$response->merchantOrderParams()->udf1;              // ?string  (also udf2–udf5, forceTerminalId, extra)
+
+$response->cardAuthInfo()->pan;                      // '628058**7215'
+$response->cardAuthInfo()->expiration;               // '202701'  (also cardholderName, approvalCode, …)
+
+$response->attributes()->mdOrder;                    // gateway order id  (+ ->extra)
+```
+
+They live under `LaravelSatim\ValueObjects\StatusResponse\{MerchantOrderParams, CardAuthInfo, Attributes}`. Each keeps
+any unmodelled field in an `extra` array, so nothing is ever lost.
+
 ### Using the facade
 
 ```php
 use LaravelSatim\Facades\Satim;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
 
+// register(), confirm(), status() and refund() are all available on the facade.
 $response = Satim::register(new SatimRegisterRequest(/* ... */));
 ```
 
@@ -265,7 +304,7 @@ lowest and the latest resolvable dependencies.
 - [x] Typed exception mapping from SATIM error codes
 - [x] Config-driven HTTP method and automatic retries
 - [x] Full unit test suite mirroring `src`
-- [ ] Status operation
+- [x] Status operation (extended order status)
 - [ ] Webhook support
 
 ---

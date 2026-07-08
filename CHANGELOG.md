@@ -2,7 +2,33 @@
 
 All notable changes to `laravel-satim` will be documented in this file
 
+## 2.1.0 - 2026-07-08
+
+### Added
+
+- **Status operation** — `status()` on the gateway and facade (`getOrderStatusExtended.do`) returning a typed
+  `SatimStatusResponse`, via the new `SatimStatusRequest` DTO
+- **Typed value objects** for nested response structures, namespaced by domain:
+  `ValueObjects\StatusResponse\{MerchantOrderParams, CardAuthInfo, Attributes}` and `ValueObjects\ConfirmResponse\Params`
+- `Support\SatimCaster` — centralised value casting (string/int/float/bool/datetime) shared by responses and value objects
+- `SatimAbstractResponse` datetime accessor for SATIM millisecond timestamps
+
+### Changed
+
+- `SatimConfirmResponse` now exposes its `params` sub-object through the typed `params()` value object
+  (replacing the previous `respCode()` / `respCodeDesc()` accessors)
+
+## 2.0.2 - 2026-07-07
+
+### Changed
+
+- set `minimum-stability` to `dev` (with `prefer-stable`) in `composer.json`
+
 ## 2.0.1 - 2026-07-07
+
+- published with no functional changes (re-tagged release)
+
+## 2.0.0 - 2026-07-07
 
 Full rewrite around pure request DTOs, immutable typed responses and a real exception hierarchy.
 This is a **breaking** release; see the migration notes below.
@@ -65,6 +91,9 @@ This is a **breaking** release; see the migration notes below.
 
 - initial release
 
+[2.1.0]: https://github.com/achetibi/laravel-satim/compare/v2.0.2...v2.1.0
+[2.0.2]: https://github.com/achetibi/laravel-satim/compare/v2.0.1...v2.0.2
+[2.0.1]: https://github.com/achetibi/laravel-satim/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/achetibi/laravel-satim/compare/v1.1.2...v2.0.0
 [1.1.2]: https://github.com/achetibi/laravel-satim/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/achetibi/laravel-satim/compare/v1.1.0...v1.1.1
