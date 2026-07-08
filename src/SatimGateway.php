@@ -12,9 +12,11 @@ use LaravelSatim\Contracts\SatimValidatorInterface;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 use LaravelSatim\Http\Requests\SatimRefundRequest;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
+use LaravelSatim\Http\Requests\SatimStatusRequest;
 use LaravelSatim\Http\Responses\SatimConfirmResponse;
 use LaravelSatim\Http\Responses\SatimRefundResponse;
 use LaravelSatim\Http\Responses\SatimRegisterResponse;
+use LaravelSatim\Http\Responses\SatimStatusResponse;
 
 final readonly class SatimGateway implements SatimGatewayInterface
 {
@@ -46,6 +48,14 @@ final readonly class SatimGateway implements SatimGatewayInterface
          * @var SatimRefundResponse
          */
         return $this->send('/refund.do', $request);
+    }
+
+    public function status(SatimStatusRequest $request): SatimStatusResponse
+    {
+        /**
+         * @var SatimStatusResponse
+         */
+        return $this->send('/getOrderStatusExtended.do', $request);
     }
 
     private function send(string $endpoint, SatimRequestInterface $request): SatimResponseInterface

@@ -8,9 +8,11 @@ use LaravelSatim\Contracts\SatimValidatorInterface;
 use LaravelSatim\Http\Requests\SatimConfirmRequest;
 use LaravelSatim\Http\Requests\SatimRefundRequest;
 use LaravelSatim\Http\Requests\SatimRegisterRequest;
+use LaravelSatim\Http\Requests\SatimStatusRequest;
 use LaravelSatim\Http\Responses\SatimConfirmResponse;
 use LaravelSatim\Http\Responses\SatimRefundResponse;
 use LaravelSatim\Http\Responses\SatimRegisterResponse;
+use LaravelSatim\Http\Responses\SatimStatusResponse;
 use LaravelSatim\SatimGateway;
 use Psr\Http\Message\ResponseInterface;
 
@@ -80,4 +82,14 @@ it('refunds against the refund endpoint', function (): void {
 
     expect($response)->toBeInstanceOf(SatimRefundResponse::class)
         ->and($client->endpoints)->toBe(['/refund.do']);
+});
+
+it('fetches the status against the extended order status endpoint', function (): void {
+    $client = fakeGatewayClient(jsonResponse(['errorCode' => '0', 'orderStatus' => 2]));
+    $gateway = new SatimGateway($client, recordingValidator());
+
+    $response = $gateway->status(new SatimStatusRequest(orderId: 'ehf9z2yvvThwQ4AACW2G'));
+
+    expect($response)->toBeInstanceOf(SatimStatusResponse::class)
+        ->and($client->endpoints)->toBe(['/getOrderStatusExtended.do']);
 });
