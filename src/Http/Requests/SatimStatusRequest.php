@@ -35,7 +35,7 @@ final readonly class SatimStatusRequest extends SatimAbstractRequest
     public function rules(): array
     {
         return [
-            'orderId' => ['required', 'string', 'alpha_num', 'max:30'],
+            'orderId' => ['required', 'string', 'alpha_num', 'max:20'],
             'language' => ['nullable', Rule::enum(Language::class)],
         ];
     }

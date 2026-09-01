@@ -34,7 +34,7 @@ final readonly class SatimRefundRequest extends SatimAbstractRequest
     public function rules(): array
     {
         return [
-            'orderId' => ['required', 'string', 'alpha_num', 'max:30'],
+            'orderId' => ['required', 'string', 'alpha_num', 'max:20'],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:50', 'max:9999999999.99'],
         ];
     }
