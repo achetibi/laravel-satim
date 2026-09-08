@@ -135,8 +135,8 @@ abstract readonly class SatimAbstractResponse implements SatimResponseInterface
         if ($this instanceof SatimConfirmResponse) {
             $actionCode = $this->actionCode();
             $errorCode = $this->params()->respCode
-                ?? ($actionCode !== null ? (string) $actionCode : null)
-                ?? $errorCode;
+                ?: ($actionCode !== null ? (string) $actionCode : null)
+                ?: $errorCode;
             $errorMessage = $this->message() ?: $errorMessage;
         }
 
